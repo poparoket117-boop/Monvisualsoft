@@ -1,2740 +1,1964 @@
--- Monvisual v2 Combat (Final v61)
-if _G.Monvisual_Loaded then
-    pcall(function() _G.Monvisual_ScreenGui:Destroy() end)
-    _G.Monvisual_Loaded = false
-end
-_G.Monvisual_Loaded = true
-
-_G.Monvisual_FreeAnimsLoaded = _G.Monvisual_FreeAnimsLoaded or false
-
-local UserInputService = game:GetService("UserInputService")
-local RunService = game:GetService("RunService")
-local Players = game:GetService("Players")
-local TweenService = game:GetService("TweenService")
-local Lighting = game:GetService("Lighting")
-local HttpService = game:GetService("HttpService")
-local Debris = game:GetService("Debris")
-local SoundService = game:GetService("SoundService")
-local Player = Players.LocalPlayer
-local Camera = workspace.CurrentCamera
-
--- ===== РЕСПАВН =====
+if _G.Monvisual_Loaded then pcall(function() _G.Monvisual_ScreenGui:Destroy() end) _G.Monvisual_Loaded=false end
+_G.Monvisual_Loaded=true
+_G.Monvisual_FreeAnimsLoaded=_G.Monvisual_FreeAnimsLoaded or false
+local UserInputService=game:GetService("UserInputService")
+local RunService=game:GetService("RunService")
+local Players=game:GetService("Players")
+local TweenService=game:GetService("TweenService")
+local Lighting=game:GetService("Lighting")
+local HttpService=game:GetService("HttpService")
+local Debris=game:GetService("Debris")
+local SoundService=game:GetService("SoundService")
+local Player=Players.LocalPlayer
+local Camera=workspace.CurrentCamera
 task.spawn(function()
-    task.wait(1)
-    if Players.CharacterAutoLoads then
-        pcall(function() Players.RespawnTime = 6 end)
-    else
-        local function setupRespawn(character)
-            local humanoid = character:WaitForChild("Humanoid", 5)
-            if not humanoid then return end
-            humanoid.Died:Connect(function()
-                task.wait(6)
-                if Player.Character == character and character.Parent then
-                    local hum = character:FindFirstChildOfClass("Humanoid")
-                    if hum and hum.Health <= 0 then
-                        pcall(function() Player:LoadCharacter() end)
-                    end
-                end
-            end)
-        end
-        if Player.Character then setupRespawn(Player.Character) end
-        Player.CharacterAdded:Connect(setupRespawn)
-    end
+task.wait(1)
+if Players.CharacterAutoLoads then pcall(function() Players.RespawnTime=6 end)
+else
+local function sr(c) local h=c:WaitForChild("Humanoid",5) if not h then return end h.Died:Connect(function() task.wait(6) if Player.Character==c and c.Parent then local x=c:FindFirstChildOfClass("Humanoid") if x and x.Health<=0 then pcall(function() Player:LoadCharacter() end) end end end) end
+if Player.Character then sr(Player.Character) end
+Player.CharacterAdded:Connect(sr)
+end
 end)
-
-local themeHue = 270
-local themeCustomColor = nil
-local themeIsClear = false
-local WHITE = Color3.fromRGB(255, 255, 255)
-local BLACK = Color3.fromRGB(0, 0, 0)
-
-local function getThemeColor() return Color3.fromRGB(20, 20, 30) end
-local function getAccentColor()
-    if themeIsClear then return WHITE end
-    if themeCustomColor then
-        return Color3.new(math.min(themeCustomColor.R + 0.5, 1), math.min(themeCustomColor.G + 0.5, 1), math.min(themeCustomColor.B + 0.5, 1))
-    end
-    return Color3.fromHSV(themeHue / 360, 0.7, 0.9)
+local themeHue=270 local themeCustomColor=nil local themeIsClear=false
+local WHITE=Color3.fromRGB(255,255,255) local BLACK=Color3.fromRGB(0,0,0)
+local function gc() return Color3.fromRGB(20,20,30) end
+local function ga()
+if themeIsClear then return WHITE end
+if themeCustomColor then return Color3.new(math.min(themeCustomColor.R+0.5,1),math.min(themeCustomColor.G+0.5,1),math.min(themeCustomColor.B+0.5,1)) end
+return Color3.fromHSV(themeHue/360,0.7,0.9)
 end
-local function getTransparency()
-    if themeIsClear then return 0.7 end
-    return 0.85
+local function gt() if themeIsClear then return 0.7 end return 0.85 end
+local S={stretchEnabled=false,STRETCH_FACTOR=0.75,particlesEnabled=false,particlesDensity=1,targetESPEnabled=false,landingCircleEnabled=false,rippleSize=0.1,rippleTransparency=0.5,fogEnabled=false,fogStart=50,fogEnd=500,skyShaderEnabled=false,skyParticlesEnabled=false,skyParticlesDensity=10,trailsEnabled=false,trailsTransparency=0.5,deathEffectEnabled=false,wastedEnabled=false,headlessEnabled=false,hatEnabled=false,rtxShadowsEnabled=false,rtxShadowsIntensity=0.7,rtxReflectionsEnabled=false,glowEnabled=false,glowIntensity=3,auraEnabled=false,auraBrightness=5,auraRange=20,auraColorUseTheme=true,dayNightEnabled=false,dayNightTime=12,chamsEnabled=false,boxEspEnabled=false,skeletonEspEnabled=false,mm2ChamsEnabled=false}
+local RS={} local rci=0 local rv=1 local rl=false
+local CF="Monvisual_config.json"
+local RF="Monvisual_radio.json"
+local AF="Monvisual_anim.json"
+local FF="Monvisual_fav.json"
+local MF="Monvisual_mix.json"
+local hF=(writefile~=nil) and (readfile~=nil) and (isfile~=nil)
+local function wf(n,d) if hF then pcall(writefile,n,d) end end
+local function rf(n) if hF then local o,d=pcall(readfile,n) if o then return d end end return nil end
+local function df(n) if hF and delfile then pcall(delfile,n) end end
+local AFav={} local MP={} local CAP=nil local AT={} local AC=nil
+local P={["Default"]={idle="507766388",walk="507777826",run="507767714",jump="507765000",climb="507765644",fall="507767968",swim="507785072",swimidle="507784897"},["Rthro"]={idle="2510196951",walk="2510202577",run="2510198475",jump="2510197830",climb="2510192778",fall="2510195892",swim="2510199791",swimidle="2510201162"},["Ninja"]={idle="656117400",walk="656121766",run="656118852",jump="656117878",climb="656114359",fall="656115606",swim="656119721",swimidle="656121397"},["Robot"]={idle="616088211",walk="616095330",run="616091570",jump="616090535",climb="616086039",fall="616087089",swim="616092998",swimidle="616094091"},["Stylish"]={idle="616136790",walk="616146177",run="616140816",jump="616139451",climb="616133594",fall="616134815",swim="616143378",swimidle="616144772"},["Cartoony"]={idle="742637544",walk="742640026",run="742638842",jump="742637942",climb="742636889",fall="742637151",swim="742639220",swimidle="742639812"},["Toy"]={idle="782841498",walk="782843345",run="782842708",jump="782847020",climb="782843869",fall="782846423",swim="782844582",swimidle="782845186"},["Oldschool"]={idle="5319828216",walk="5319847204",run="5319844329",jump="5319841935",climb="5319816685",fall="5319839762",swim="5319850266",swimidle="5319852613"},["Zombie"]={idle="616158929",walk="616168032",run="616163682",jump="616161997",climb="616156119",fall="616157476",swim="616165109",swimidle="616166655"},["Superhero"]={idle="616111295",walk="616122287",run="616117076",jump="616115533",climb="616104706",fall="616108001",swim="616119360",swimidle="616120861"},["Werewolf"]={idle="1083195517",walk="1083178339",run="1083216690",jump="1083218792",climb="1083182000",fall="1083189019",swim="1083222527",swimidle="1083225406"},["Vampire"]={idle="1083445855",walk="1083473930",run="1083462077",jump="1083455352",climb="1083439238",fall="1083443587",swim="1083464683",swimidle="1083467779"}}
+local function lfav() local d=rf(FF) if not d then return end local o,p=pcall(function() return HttpService:JSONDecode(d) end) if o and type(p)=="table" then AFav=p end end
+local function lmix() local d=rf(MF) if not d then return end local o,p=pcall(function() return HttpService:JSONDecode(d) end) if o and type(p)=="table" then MP=p for n,pk in pairs(MP) do P[n]=pk end end end
+local function sfav() wf(FF,HttpService:JSONEncode(AFav)) end
+local function smix() wf(MF,HttpService:JSONEncode(MP)) end
+lfav() lmix()
+local function clrA() for _,t in pairs(AT) do if t then pcall(function() t:Stop(0) t:Destroy() end) end end AT={} end
+local function stpAll(h) if not h then return end for _,t in pairs(h:GetPlayingAnimationTracks()) do local o=false for _,our in pairs(AT) do if our==t then o=true break end end if not o then pcall(function() t:Stop(0) end) end end end
+local function loadA(pk)
+local c=Player.Character if not c then return end
+local h=c:FindFirstChildOfClass("Humanoid") if not h then return end
+clrA()
+local an=h:FindFirstChildOfClass("Animator")
+if not an then an=Instance.new("Animator") an.Parent=h end
+local function mk(id,pr) if not id or id=="" then return nil end local ci=tostring(id):gsub("%D","") if ci=="" then return nil end local a=Instance.new("Animation") a.AnimationId="rbxassetid://"..ci local o,t=pcall(function() return an:LoadAnimation(a) end) if o and t then t.Priority=pr t.Looped=true return t end return nil end
+AT.Idle=mk(pk.idle,Enum.AnimationPriority.Idle)
+AT.Walk=mk(pk.walk,Enum.AnimationPriority.Movement)
+AT.Run=mk(pk.run,Enum.AnimationPriority.Movement)
+AT.Jump=mk(pk.jump,Enum.AnimationPriority.Action)
+AT.Fall=mk(pk.fall,Enum.AnimationPriority.Action)
+AT.Climb=mk(pk.climb,Enum.AnimationPriority.Action)
+AT.Swim=mk(pk.swim,Enum.AnimationPriority.Movement)
+AT.SwimIdle=mk(pk.swimidle or pk.idle,Enum.AnimationPriority.Idle)
 end
-
-local settings = {
-    stretchEnabled = false, STRETCH_FACTOR = 0.75,
-    particlesEnabled = false, particlesDensity = 1,
-    landingCircleEnabled = false, rippleSize = 0.1, rippleTransparency = 0.5,
-    trailsEnabled = false, trailsTransparency = 0.5,
-    deathEffectEnabled = false,
-    wastedEnabled = false,
-    headlessEnabled = false,
-    hatEnabled = false,
-    rtxShadowsEnabled = false, rtxShadowsIntensity = 0.7,
-    rtxReflectionsEnabled = false,
-    glowEnabled = false, glowIntensity = 3,
-    auraEnabled = false, auraBrightness = 5, auraRange = 20, auraColorUseTheme = true,
-    dayNightEnabled = false, dayNightTime = 12,
-    chamsEnabled = false,
-    boxEspEnabled = false,
-    skeletonEspEnabled = false,
-    mm2ChamsEnabled = false
-}
-
-local radioSongs = {}
-local radioCurrentIndex = 0
-local radioVolume = 1
-local radioLoop = false
-
--- ===== ФАЙЛЫ =====
-local CONFIG_FILE = "Monvisual_config.json"
-local RADIO_FILE = "Monvisual_radio.json"
-local ANIM_FILE = "Monvisual_anim.json"
-local FAV_FILE = "Monvisual_fav.json"
-
-local hasFileApi = (writefile ~= nil) and (readfile ~= nil) and (isfile ~= nil)
-
-local function _writefile(name, data)
-    if hasFileApi then pcall(writefile, name, data) end
+local aLN=nil local aLT=0
+local function pAnim(n)
+local t=AT[n]
+if t and t.IsPlaying then if t.TimePosition==aLT and n==aLN then pcall(function() t:Stop(0) t:Play(0.1) end) end aLT=t.TimePosition aLN=n return end
+aLN=n aLT=0
+for nn,tt in pairs(AT) do if tt then if nn==n then pcall(function() tt:Play(0.15) tt:AdjustSpeed(1) end) else if tt.IsPlaying then pcall(function() tt:Stop(0.1) end) end end end end
 end
-local function _readfile(name)
-    if hasFileApi then
-        local ok, data = pcall(readfile, name)
-        if ok then return data end
-    end
-    return nil
+local function aUpd()
+local c=Player.Character if not c or not CAP then return end
+local h=c:FindFirstChildOfClass("Humanoid") if not h or h.Health<=0 then return end
+stpAll(h)
+local an=c:FindFirstChild("Animate") if an then pcall(function() an.Disabled=true an:Destroy() end) end
+local st=h:GetState()
+local sp=0 if h.RootPart then sp=h.RootPart.AssemblyLinearVelocity.Magnitude end
+if st==Enum.HumanoidStateType.Jumping then pAnim("Jump")
+elseif st==Enum.HumanoidStateType.Freefall then pAnim("Fall")
+elseif st==Enum.HumanoidStateType.Climbing then pAnim("Climb")
+elseif st==Enum.HumanoidStateType.Swimming then pAnim(sp>1 and "Swim" or "SwimIdle")
+else if sp>1.5 then pAnim(sp>14 and "Run" or "Walk") else pAnim("Idle") end end
 end
-local function _isfile(name)
-    if hasFileApi then
-        local ok, res = pcall(isfile, name)
-        if ok then return res end
-    end
-    return false
+function ApplyAnimPack(pk,pn)
+if not pk then return end
+CAP=pk aLN=nil
+local c=Player.Character if not c then return end
+local h=c:WaitForChild("Humanoid",5) if not h then return end
+local an=c:FindFirstChild("Animate") if an then pcall(function() an.Disabled=true an:Destroy() end) end
+for _,t in pairs(h:GetPlayingAnimationTracks()) do pcall(function() t:Stop(0) end) end
+task.wait(0.2)
+loadA(pk)
+if AC then AC:Disconnect() AC=nil end
+AC=RunService.RenderStepped:Connect(aUpd)
+if pn then wf(AF,HttpService:JSONEncode({name=pn,pack=pk})) end
 end
-local function _delfile(name)
-    if hasFileApi and delfile then pcall(delfile, name) end
-end
-
--- ===== ХРАНИЛИЩА =====
-local AnimFavorites = {}
-local CurrentAnimPack = nil
-local AnimTracks = {}
-local AnimConn = nil
-
--- ===== PACKS =====
-local Packs = {
-    ["Default"]   = {idle="507766388", walk="507777826", run="507767714", jump="507765000", climb="507765644", fall="507767968", swim="507785072", swimidle="507784897"},
-    ["Rthro"]     = {idle="2510196951", walk="2510202577", run="2510198475", jump="2510197830", climb="2510192778", fall="2510195892", swim="2510199791", swimidle="2510201162"},
-    ["Ninja"]     = {idle="656117400", walk="656121766", run="656118852", jump="656117878", climb="656114359", fall="656115606", swim="656119721", swimidle="656121397"},
-    ["Robot"]     = {idle="616088211", walk="616095330", run="616091570", jump="616090535", climb="616086039", fall="616087089", swim="616092998", swimidle="616094091"},
-    ["Stylish"]   = {idle="616136790", walk="616146177", run="616140816", jump="616139451", climb="616133594", fall="616134815", swim="616143378", swimidle="616144772"},
-    ["Cartoony"]  = {idle="742637544", walk="742640026", run="742638842", jump="742637942", climb="742636889", fall="742637151", swim="742639220", swimidle="742639812"},
-    ["Toy"]       = {idle="782841498", walk="782843345", run="782842708", jump="782847020", climb="782843869", fall="782846423", swim="782844582", swimidle="782845186"},
-    ["Oldschool"] = {idle="5319828216", walk="5319847204", run="5319844329", jump="5319841935", climb="5319816685", fall="5319839762", swim="5319850266", swimidle="5319852613"},
-    ["Zombie"]    = {idle="616158929", walk="616168032", run="616163682", jump="616161997", climb="616156119", fall="616157476", swim="616165109", swimidle="616166655"},
-    ["Superhero"] = {idle="616111295", walk="616122287", run="616117076", jump="616115533", climb="616104706", fall="616108001", swim="616119360", swimidle="616120861"},
-    ["Werewolf"]  = {idle="1083195517", walk="1083178339", run="1083216690", jump="1083218792", climb="1083182000", fall="1083189019", swim="1083222527", swimidle="1083225406"},
-    ["Vampire"]   = {idle="1083445855", walk="1083473930", run="1083462077", jump="1083455352", climb="1083439238", fall="1083443587", swim="1083464683", swimidle="1083467779"},
-}
-
-local function LoadFavorites()
-    local data = _readfile(FAV_FILE)
-    if not data then return end
-    local ok, parsed = pcall(function() return HttpService:JSONDecode(data) end)
-    if ok and type(parsed) == "table" then
-        AnimFavorites = parsed
-    end
-end
-
-local function SaveFavorites()
-    _writefile(FAV_FILE, HttpService:JSONEncode(AnimFavorites))
-end
-
-LoadFavorites()
-
--- ===== ANIM =====
-local function ClearAnimTracks()
-    for _, t in pairs(AnimTracks) do
-        if t then
-            pcall(function() t:Stop(0) t:Destroy() end)
-        end
-    end
-    AnimTracks = {}
-end
-
-local function StopAllOther(hum)
-    if not hum then return end
-    for _, track in pairs(hum:GetPlayingAnimationTracks()) do
-        local isOurs = false
-        for _, our in pairs(AnimTracks) do
-            if our == track then isOurs = true break end
-        end
-        if not isOurs then
-            pcall(function() track:Stop(0) end)
-        end
-    end
-end
-
-local function LoadAnimTracks(pack)
-    local char = Player.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    ClearAnimTracks()
-
-    local animator = hum:FindFirstChildOfClass("Animator")
-    if not animator then
-        animator = Instance.new("Animator")
-        animator.Parent = hum
-    end
-
-    local function make(id, prio)
-        if not id or id == "" then return nil end
-        local cleanId = tostring(id):gsub("%D", "")
-        if cleanId == "" then return nil end
-        local a = Instance.new("Animation")
-        a.AnimationId = "rbxassetid://" .. cleanId
-        local ok, track = pcall(function()
-            return animator:LoadAnimation(a)
-        end)
-        if ok and track then
-            track.Priority = prio
-            track.Looped = true
-            return track
-        end
-        return nil
-    end
-
-    AnimTracks.Idle     = make(pack.idle, Enum.AnimationPriority.Idle)
-    AnimTracks.Walk     = make(pack.walk, Enum.AnimationPriority.Movement)
-    AnimTracks.Run      = make(pack.run,  Enum.AnimationPriority.Movement)
-    AnimTracks.Jump     = make(pack.jump, Enum.AnimationPriority.Action)
-    AnimTracks.Fall     = make(pack.fall, Enum.AnimationPriority.Action)
-    AnimTracks.Climb    = make(pack.climb, Enum.AnimationPriority.Action)
-    AnimTracks.Swim     = make(pack.swim, Enum.AnimationPriority.Movement)
-    AnimTracks.SwimIdle = make(pack.swimidle or pack.idle, Enum.AnimationPriority.Idle)
-end
-
-local animLastName, animLastTime = nil, 0
-
-local function PlayAnim(name)
-    local track = AnimTracks[name]
-    if track and track.IsPlaying then
-        if track.TimePosition == animLastTime and name == animLastName then
-            pcall(function() track:Stop(0) track:Play(0.1) end)
-        end
-        animLastTime = track.TimePosition
-        animLastName = name
-        return
-    end
-    animLastName = name
-    animLastTime = 0
-    for n, t in pairs(AnimTracks) do
-        if t then
-            if n == name then
-                pcall(function() t:Play(0.15) t:AdjustSpeed(1) end)
-            else
-                if t.IsPlaying then pcall(function() t:Stop(0.1) end) end
-            end
-        end
-    end
-end
-
-local function AnimUpdate()
-    local char = Player.Character
-    if not char or not CurrentAnimPack then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum or hum.Health <= 0 then return end
-    StopAllOther(hum)
-
-    local animate = char:FindFirstChild("Animate")
-    if animate then pcall(function() animate.Disabled = true animate:Destroy() end) end
-
-    local state = hum:GetState()
-    local speed = 0
-    if hum.RootPart then
-        speed = hum.RootPart.AssemblyLinearVelocity.Magnitude
-    end
-
-    if state == Enum.HumanoidStateType.Jumping then
-        PlayAnim("Jump")
-    elseif state == Enum.HumanoidStateType.Freefall then
-        PlayAnim("Fall")
-    elseif state == Enum.HumanoidStateType.Climbing then
-        PlayAnim("Climb")
-    elseif state == Enum.HumanoidStateType.Swimming then
-        PlayAnim(speed > 1 and "Swim" or "SwimIdle")
-    else
-        if speed > 1.5 then
-            PlayAnim(speed > 14 and "Run" or "Walk")
-        else
-            PlayAnim("Idle")
-        end
-    end
-end
-
-function ApplyAnimPack(pack, packName)
-    if not pack then return end
-    CurrentAnimPack = pack
-    animLastName = nil
-    local char = Player.Character
-    if not char then return end
-    local hum = char:WaitForChild("Humanoid", 5)
-    if not hum then return end
-
-    local animate = char:FindFirstChild("Animate")
-    if animate then pcall(function() animate.Disabled = true animate:Destroy() end) end
-
-    for _, t in pairs(hum:GetPlayingAnimationTracks()) do
-        pcall(function() t:Stop(0) end)
-    end
-
-    task.wait(0.2)
-    LoadAnimTracks(pack)
-
-    if AnimConn then AnimConn:Disconnect() AnimConn = nil end
-    AnimConn = RunService.RenderStepped:Connect(AnimUpdate)
-
-    if packName then
-        _writefile(ANIM_FILE, HttpService:JSONEncode({ name = packName, pack = pack }))
-    end
-end
-
 function ResetAnimations()
-    if AnimConn then AnimConn:Disconnect() AnimConn = nil end
-    ClearAnimTracks()
-    CurrentAnimPack = nil
-    animLastName = nil
-
-    _delfile(ANIM_FILE)
-
-    local char = Player.Character
-    if char then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            for _, t in pairs(hum:GetPlayingAnimationTracks()) do
-                pcall(function() t:Stop(0) end)
-            end
-        end
-        if not char:FindFirstChild("Animate") then
-            local animate = game:GetService("StarterPlayer").StarterCharacterScripts:FindFirstChild("Animate")
-            if animate then
-                local newAnimate = animate:Clone()
-                newAnimate.Parent = char
-            end
-        else
-            local animate = char:FindFirstChild("Animate")
-            if animate then animate.Disabled = false end
-        end
-    end
+if AC then AC:Disconnect() AC=nil end
+clrA() CAP=nil aLN=nil
+df(AF)
+local c=Player.Character
+if c then
+local h=c:FindFirstChildOfClass("Humanoid")
+if h then for _,t in pairs(h:GetPlayingAnimationTracks()) do pcall(function() t:Stop(0) end) end end
+if not c:FindFirstChild("Animate") then
+local an=game:GetService("StarterPlayer").StarterCharacterScripts:FindFirstChild("Animate")
+if an then local na=an:Clone() na.Parent=c end
+else local an=c:FindFirstChild("Animate") if an then an.Disabled=false end end
 end
-
+end
 task.spawn(function()
-    task.wait(1.5)
-    local data = _readfile(ANIM_FILE)
-    if data then
-        local ok, parsed = pcall(function() return HttpService:JSONDecode(data) end)
-        if ok and parsed and parsed.pack then
-            ApplyAnimPack(parsed.pack, parsed.name)
-            print("[Monvisual] Загружен пак: " .. tostring(parsed.name))
-        end
-    end
+task.wait(1.5)
+local d=rf(AF)
+if d then local o,p=pcall(function() return HttpService:JSONDecode(d) end) if o and p and p.pack then ApplyAnimPack(p.pack,p.name) print("[Monvisual] Загружен пак: "..tostring(p.name)) end end
 end)
-
-Player.CharacterAdded:Connect(function(char)
-    local hum = char:WaitForChild("Humanoid", 8)
-    if not hum then return end
-    task.wait(1)
-    local animate = char:FindFirstChild("Animate")
-    if animate then pcall(function() animate.Disabled = true animate:Destroy() end) end
-    if CurrentAnimPack then
-        task.wait(0.5)
-        ApplyAnimPack(CurrentAnimPack)
-    end
+Player.CharacterAdded:Connect(function(c)
+local h=c:WaitForChild("Humanoid",8) if not h then return end
+task.wait(1)
+local an=c:FindFirstChild("Animate") if an then pcall(function() an.Disabled=true an:Destroy() end) end
+if CAP then task.wait(0.5) ApplyAnimPack(CAP) end
 end)
-
--- ===== СОХРАНЕНИЕ КОНФИГА =====
-local function SaveConfig()
-    local data = {}
-    for k, v in pairs(settings) do
-        if typeof(v) == "Color3" then data[k] = {v.R, v.G, v.B}
-        else data[k] = v end
-    end
-    data.themeHue = themeHue
-    data.themeIsClear = themeIsClear
-    data.radioVolume = radioVolume
-    data.radioLoop = radioLoop
-    _writefile(CONFIG_FILE, HttpService:JSONEncode(data))
+local function sCfg()
+local d={}
+for k,v in pairs(S) do if typeof(v)=="Color3" then d[k]={v.R,v.G,v.B} else d[k]=v end end
+d.themeHue=themeHue d.themeIsClear=themeIsClear d.radioVolume=rv d.radioLoop=rl
+wf(CF,HttpService:JSONEncode(d))
 end
-
-local function LoadConfig()
-    local data = _readfile(CONFIG_FILE)
-    if not data then return end
-    local ok, parsed = pcall(function() return HttpService:JSONDecode(data) end)
-    if not ok or not parsed then return end
-    for k, v in pairs(parsed) do
-        if k == "themeHue" then themeHue = v
-        elseif k == "themeIsClear" then themeIsClear = v
-        elseif k == "radioVolume" then radioVolume = v
-        elseif k == "radioLoop" then radioLoop = v
-        elseif settings[k] ~= nil then settings[k] = v end
-    end
+local function lCfg()
+local d=rf(CF) if not d then return end
+local o,p=pcall(function() return HttpService:JSONDecode(d) end)
+if not o or not p then return end
+for k,v in pairs(p) do if k=="themeHue" then themeHue=v elseif k=="themeIsClear" then themeIsClear=v elseif k=="radioVolume" then rv=v elseif k=="radioLoop" then rl=v elseif S[k]~=nil then S[k]=v end end
 end
-
-local function SaveRadio()
-    _writefile(RADIO_FILE, HttpService:JSONEncode(radioSongs))
+local function sR() wf(RF,HttpService:JSONEncode(RS)) end
+local function lR()
+local d=rf(RF) if not d then return end
+local o,p=pcall(function() return HttpService:JSONDecode(d) end)
+if o and type(p)=="table" then RS=p end
 end
-
-local function LoadRadio()
-    local data = _readfile(RADIO_FILE)
-    if not data then return end
-    local ok, parsed = pcall(function() return HttpService:JSONDecode(data) end)
-    if ok and type(parsed) == "table" then
-        radioSongs = parsed
-    end
+lCfg() lR()
+local chamHl={}
+local function rmCh(p) if chamHl[p] then pcall(function() chamHl[p]:Destroy() end) chamHl[p]=nil end end
+local function crCh(p,c)
+if p==Player then return end
+rmCh(p)
+local hl=Instance.new("Highlight")
+hl.Name="Monvisual_Chams" hl.Adornee=c hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop hl.FillColor=ga() hl.FillTransparency=0.35 hl.OutlineColor=BLACK hl.OutlineTransparency=0 hl.Parent=c
+chamHl[p]=hl
 end
-
-LoadConfig()
-LoadRadio()
-
--- ===== COMBAT: CHAMS =====
-local chamsHighlights = {}
-
-local function RemoveChams(player)
-    if chamsHighlights[player] then
-        pcall(function() chamsHighlights[player]:Destroy() end)
-        chamsHighlights[player] = nil
-    end
+local function stpCh(p)
+if p==Player then return end
+p.CharacterAdded:Connect(function(c) task.wait(0.1) if S.chamsEnabled then crCh(p,c) end end)
+if p.Character and S.chamsEnabled then crCh(p,p.Character) end
 end
-
-local function CreateChams(player, character)
-    if player == Player then return end
-    RemoveChams(player)
-    local hl = Instance.new("Highlight")
-    hl.Name = "Monvisual_Chams"
-    hl.Adornee = character
-    hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-    hl.FillColor = getAccentColor()
-    hl.FillTransparency = 0.35
-    hl.OutlineColor = BLACK
-    hl.OutlineTransparency = 0
-    hl.Parent = character
-    chamsHighlights[player] = hl
+local function aCh()
+for _,p in ipairs(Players:GetPlayers()) do if p~=Player then if S.chamsEnabled and p.Character then crCh(p,p.Character) else rmCh(p) end end end
 end
-
-local function SetupChamsPlayer(player)
-    if player == Player then return end
-    player.CharacterAdded:Connect(function(char)
-        task.wait(0.1)
-        if settings.chamsEnabled then CreateChams(player, char) end
-    end)
-    if player.Character and settings.chamsEnabled then
-        CreateChams(player, player.Character)
-    end
+local bGui=Instance.new("ScreenGui")
+bGui.Name="Monvisual_BoxESP" bGui.ResetOnSpawn=false bGui.IgnoreGuiInset=true bGui.DisplayOrder=5
+pcall(function() bGui.Parent=game.CoreGui end)
+local Bx={} local BT=1.5
+local function crB(p)
+if p==Player then return end
+if Bx[p] then return end
+local b=Instance.new("Frame")
+b.BackgroundTransparency=1 b.BorderSizePixel=0 b.Visible=false b.Parent=bGui
+local function mks() local f=Instance.new("Frame") f.BackgroundColor3=ga() f.BorderSizePixel=0 f.Parent=b return f end
+local t=mks() local bo=mks() local l=mks() local r=mks()
+Bx[p]={Box=b,Top=t,Bottom=bo,Left=l,Right=r}
 end
-
-local function ApplyChams()
-    for _, p in ipairs(Players:GetPlayers()) do
-        if p ~= Player then
-            if settings.chamsEnabled and p.Character then
-                CreateChams(p, p.Character)
-            else
-                RemoveChams(p)
-            end
-        end
-    end
+local function rmB(p) if Bx[p] then pcall(function() Bx[p].Box:Destroy() end) Bx[p]=nil end end
+local function aBx()
+if S.boxEspEnabled then for _,p in ipairs(Players:GetPlayers()) do if p~=Player then crB(p) end end
+else for p in pairs(Bx) do rmB(p) end end
 end
-
--- ===== COMBAT: BOX ESP =====
-local boxGui = Instance.new("ScreenGui")
-boxGui.Name = "Monvisual_BoxESP"
-boxGui.ResetOnSpawn = false
-boxGui.IgnoreGuiInset = true
-boxGui.DisplayOrder = 5
-pcall(function() boxGui.Parent = game.CoreGui end)
-
-local Boxes = {}
-local BOX_THICKNESS = 1.5
-
-local function CreateBox(player)
-    if player == Player then return end
-    if Boxes[player] then return end
-
-    local box = Instance.new("Frame")
-    box.BackgroundTransparency = 1
-    box.BorderSizePixel = 0
-    box.Visible = false
-    box.Parent = boxGui
-
-    local function makeSide()
-        local f = Instance.new("Frame")
-        f.BackgroundColor3 = getAccentColor()
-        f.BorderSizePixel = 0
-        f.Parent = box
-        return f
-    end
-
-    local top = makeSide()
-    local bottom = makeSide()
-    local left = makeSide()
-    local right = makeSide()
-
-    Boxes[player] = {
-        Box = box,
-        Top = top,
-        Bottom = bottom,
-        Left = left,
-        Right = right
-    }
+local skGui=Instance.new("ScreenGui")
+skGui.Name="Monvisual_SkeletonESP" skGui.ResetOnSpawn=false skGui.IgnoreGuiInset=true skGui.ZIndexBehavior=Enum.ZIndexBehavior.Global skGui.DisplayOrder=6
+pcall(function() skGui.Parent=game.CoreGui end)
+local Sk={} local LW=2
+local R15B={{"Head","UpperTorso"},{"UpperTorso","LowerTorso"},{"UpperTorso","LeftUpperArm"},{"LeftUpperArm","LeftLowerArm"},{"LeftLowerArm","LeftHand"},{"UpperTorso","RightUpperArm"},{"RightUpperArm","RightLowerArm"},{"RightLowerArm","RightHand"},{"LowerTorso","LeftUpperLeg"},{"LeftUpperLeg","LeftLowerLeg"},{"LeftLowerLeg","LeftFoot"},{"LowerTorso","RightUpperLeg"},{"RightUpperLeg","RightLowerLeg"},{"RightLowerLeg","RightFoot"}}
+local R6B={{"Head","Torso"},{"Torso","Left Arm"},{"Torso","Right Arm"},{"Torso","Left Leg"},{"Torso","Right Leg"}}
+local function mkSL() local l=Instance.new("Frame") l.BackgroundColor3=ga() l.BorderSizePixel=0 l.AnchorPoint=Vector2.new(0.5,0.5) l.Visible=false l.ZIndex=10 l.Parent=skGui return l end
+local function crSk(p,c)
+if p==Player then return end
+if Sk[p] then for _,l in ipairs(Sk[p].Lines) do pcall(function() l:Destroy() end) end end
+local h=c:FindFirstChildOfClass("Humanoid") if not h then return end
+local b=(h.RigType==Enum.HumanoidRigType.R15) and R15B or R6B
+local ls={}
+for _=1,#b do table.insert(ls,mkSL()) end
+Sk[p]={Character=c,Lines=ls,Bones=b}
 end
-
-local function RemoveBox(player)
-    if Boxes[player] then
-        pcall(function() Boxes[player].Box:Destroy() end)
-        Boxes[player] = nil
-    end
+local function rmSk(p) if Sk[p] then for _,l in ipairs(Sk[p].Lines) do pcall(function() l:Destroy() end) end Sk[p]=nil end end
+local function aSk()
+if S.skeletonEspEnabled then for _,p in ipairs(Players:GetPlayers()) do if p~=Player and p.Character then crSk(p,p.Character) end end
+else for p in pairs(Sk) do rmSk(p) end end
 end
-
-local function ApplyBoxEsp()
-    if settings.boxEspEnabled then
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= Player then CreateBox(p) end
-        end
-    else
-        for p in pairs(Boxes) do RemoveBox(p) end
-    end
+local mmF=Instance.new("Folder") mmF.Name="Monvisual_MM2Chams" mmF.Parent=workspace
+local function mmRole(p)
+if p==Player then return "You",Color3.fromRGB(255,255,255) end
+for _,cn in ipairs({p.Character,p:FindFirstChild("Backpack")}) do if cn then for _,t in ipairs(cn:GetChildren()) do if t:IsA("Tool") then local n=t.Name:lower() if n:find("knife",1,true) then return "Murderer",Color3.fromRGB(255,0,0) end if n:find("gun",1,true) or n:find("revolver",1,true) then return "Sheriff",Color3.fromRGB(0,120,255) end end end end end
+return "Innocent",Color3.fromRGB(0,255,0)
 end
-
--- ===== COMBAT: SKELETON ESP =====
-local skelGui = Instance.new("ScreenGui")
-skelGui.Name = "Monvisual_SkeletonESP"
-skelGui.ResetOnSpawn = false
-skelGui.IgnoreGuiInset = true
-skelGui.ZIndexBehavior = Enum.ZIndexBehavior.Global
-skelGui.DisplayOrder = 6
-pcall(function() skelGui.Parent = game.CoreGui end)
-
-local Skeletons = {}
-local LINE_WIDTH = 2
-
-local R15Bones = {
-    {"Head", "UpperTorso"},
-    {"UpperTorso", "LowerTorso"},
-    {"UpperTorso", "LeftUpperArm"},
-    {"LeftUpperArm", "LeftLowerArm"},
-    {"LeftLowerArm", "LeftHand"},
-    {"UpperTorso", "RightUpperArm"},
-    {"RightUpperArm", "RightLowerArm"},
-    {"RightLowerArm", "RightHand"},
-    {"LowerTorso", "LeftUpperLeg"},
-    {"LeftUpperLeg", "LeftLowerLeg"},
-    {"LeftLowerLeg", "LeftFoot"},
-    {"LowerTorso", "RightUpperLeg"},
-    {"RightUpperLeg", "RightLowerLeg"},
-    {"RightLowerLeg", "RightFoot"},
-}
-
-local R6Bones = {
-    {"Head", "Torso"},
-    {"Torso", "Left Arm"},
-    {"Torso", "Right Arm"},
-    {"Torso", "Left Leg"},
-    {"Torso", "Right Leg"},
-}
-
-local function MakeSkelLine()
-    local line = Instance.new("Frame")
-    line.BackgroundColor3 = getAccentColor()
-    line.BorderSizePixel = 0
-    line.AnchorPoint = Vector2.new(0.5, 0.5)
-    line.Visible = false
-    line.ZIndex = 10
-    line.Parent = skelGui
-    return line
+local function mmClr() for _,c in ipairs(mmF:GetChildren()) do c:Destroy() end end
+local function mmBld()
+for _,p in ipairs(Players:GetPlayers()) do
+if p==Player then continue end
+local c=p.Character if not c then continue end
+local hrp=c:FindFirstChild("HumanoidRootPart") if not hrp then continue end
+local h=c:FindFirstChildOfClass("Humanoid") if h and h.Health<=0 then continue end
+local r,col=mmRole(p)
+local hl=Instance.new("Highlight") hl.Adornee=c hl.FillColor=col hl.FillTransparency=0.5 hl.OutlineColor=col hl.OutlineTransparency=0 hl.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop hl.Parent=mmF
+local bl=Instance.new("BillboardGui") bl.Adornee=hrp bl.Size=UDim2.new(0,140,0,36) bl.StudsOffset=Vector3.new(0,3,0) bl.AlwaysOnTop=true bl.Parent=mmF
+local lb=Instance.new("TextLabel") lb.Size=UDim2.new(1,0,1,0) lb.BackgroundTransparency=1 lb.Text=r lb.TextColor3=col lb.TextStrokeTransparency=0 lb.TextScaled=true lb.Parent=bl
 end
-
-local function CreateSkeleton(player, character)
-    if player == Player then return end
-    if Skeletons[player] then
-        for _, line in ipairs(Skeletons[player].Lines) do
-            pcall(function() line:Destroy() end)
-        end
-    end
-
-    local humanoid = character:FindFirstChildOfClass("Humanoid")
-    if not humanoid then return end
-
-    local bones = (humanoid.RigType == Enum.HumanoidRigType.R15) and R15Bones or R6Bones
-    local lines = {}
-    for _ = 1, #bones do
-        table.insert(lines, MakeSkelLine())
-    end
-
-    Skeletons[player] = {
-        Character = character,
-        Lines = lines,
-        Bones = bones
-    }
 end
-
-local function RemoveSkeleton(player)
-    if Skeletons[player] then
-        for _, line in ipairs(Skeletons[player].Lines) do
-            pcall(function() line:Destroy() end)
-        end
-        Skeletons[player] = nil
-    end
-end
-
-local function ApplySkeletonEsp()
-    if settings.skeletonEspEnabled then
-        for _, p in ipairs(Players:GetPlayers()) do
-            if p ~= Player and p.Character then
-                CreateSkeleton(p, p.Character)
-            end
-        end
-    else
-        for p in pairs(Skeletons) do RemoveSkeleton(p) end
-    end
-end
-
--- ===== COMBAT: MM2 CHAMS =====
-local mm2Folder = Instance.new("Folder")
-mm2Folder.Name = "Monvisual_MM2Chams"
-mm2Folder.Parent = workspace
-
-local function MM2GetRole(plr)
-    if plr == Player then return "You", Color3.fromRGB(255, 255, 255) end
-    for _, cont in ipairs({plr.Character, plr:FindFirstChild("Backpack")}) do
-        if cont then
-            for _, t in ipairs(cont:GetChildren()) do
-                if t:IsA("Tool") then
-                    local n = t.Name:lower()
-                    if n:find("knife", 1, true) then
-                        return "Murderer", Color3.fromRGB(255, 0, 0)
-                    end
-                    if n:find("gun", 1, true) or n:find("revolver", 1, true) then
-                        return "Sheriff", Color3.fromRGB(0, 120, 255)
-                    end
-                end
-            end
-        end
-    end
-    return "Innocent", Color3.fromRGB(0, 255, 0)
-end
-
-local function MM2Clear()
-    for _, c in ipairs(mm2Folder:GetChildren()) do
-        c:Destroy()
-    end
-end
-
-local function MM2Build()
-    for _, plr in ipairs(Players:GetPlayers()) do
-        if plr == Player then continue end
-        local char = plr.Character
-        if not char then continue end
-        local hrp = char:FindFirstChild("HumanoidRootPart")
-        if not hrp then continue end
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum and hum.Health <= 0 then continue end
-
-        local role, color = MM2GetRole(plr)
-
-        local hl = Instance.new("Highlight")
-        hl.Adornee = char
-        hl.FillColor = color
-        hl.FillTransparency = 0.5
-        hl.OutlineColor = color
-        hl.OutlineTransparency = 0
-        hl.DepthMode = Enum.HighlightDepthMode.AlwaysOnTop
-        hl.Parent = mm2Folder
-
-        local bill = Instance.new("BillboardGui")
-        bill.Adornee = hrp
-        bill.Size = UDim2.new(0, 140, 0, 36)
-        bill.StudsOffset = Vector3.new(0, 3, 0)
-        bill.AlwaysOnTop = true
-        bill.Parent = mm2Folder
-
-        local lbl = Instance.new("TextLabel")
-        lbl.Size = UDim2.new(1, 0, 1, 0)
-        lbl.BackgroundTransparency = 1
-        lbl.Text = role
-        lbl.TextColor3 = color
-        lbl.TextStrokeTransparency = 0
-        lbl.TextScaled = true
-        lbl.Parent = bill
-    end
-end
-
-for _, p in ipairs(Players:GetPlayers()) do
-    SetupChamsPlayer(p)
-end
+for _,p in ipairs(Players:GetPlayers()) do stpCh(p) end
 Players.PlayerAdded:Connect(function(p)
-    SetupChamsPlayer(p)
-    if settings.boxEspEnabled then CreateBox(p) end
-    p.CharacterAdded:Connect(function(char)
-        task.wait(0.2)
-        if settings.skeletonEspEnabled and char.Parent then
-            CreateSkeleton(p, char)
-        end
-    end)
+stpCh(p)
+if S.boxEspEnabled then crB(p) end
+p.CharacterAdded:Connect(function(c) task.wait(0.2) if S.skeletonEspEnabled and c.Parent then crSk(p,c) end end)
 end)
-Players.PlayerRemoving:Connect(function(p)
-    RemoveChams(p)
-    RemoveBox(p)
-    RemoveSkeleton(p)
-end)
-
+Players.PlayerRemoving:Connect(function(p) rmCh(p) rmB(p) rmSk(p) end)
 RunService.RenderStepped:Connect(function()
-    -- Box ESP
-    if settings.boxEspEnabled then
-        for player, data in pairs(Boxes) do
-            local character = player.Character
-            local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-            local root = character and character:FindFirstChild("HumanoidRootPart")
-
-            if not character or not humanoid or humanoid.Health <= 0 or not root then
-                data.Box.Visible = false
-                continue
-            end
-
-            local HEIGHT = 6
-            local WIDTH = 3.2
-
-            local topWorld = root.Position + Vector3.new(0, HEIGHT / 2, 0)
-            local bottomWorld = root.Position - Vector3.new(0, HEIGHT / 2, 0)
-
-            local top = Camera:WorldToViewportPoint(topWorld)
-            local bottom = Camera:WorldToViewportPoint(bottomWorld)
-
-            if top.Z <= 0 or bottom.Z <= 0 then
-                data.Box.Visible = false
-                continue
-            end
-
-            local screenHeight = math.abs(top.Y - bottom.Y)
-            local screenWidth = screenHeight * (WIDTH / HEIGHT)
-            local centerX = (top.X + bottom.X) / 2
-            local centerY = (top.Y + bottom.Y) / 2
-            local x = centerX - screenWidth / 2
-            local y = centerY - screenHeight / 2
-
-            data.Box.Position = UDim2.fromOffset(x, y)
-            data.Box.Size = UDim2.fromOffset(screenWidth, screenHeight)
-
-            data.Top.Position = UDim2.fromOffset(0, 0)
-            data.Top.Size = UDim2.new(1, 0, 0, BOX_THICKNESS)
-            data.Bottom.Position = UDim2.new(0, 0, 1, -BOX_THICKNESS)
-            data.Bottom.Size = UDim2.new(1, 0, 0, BOX_THICKNESS)
-            data.Left.Position = UDim2.fromOffset(0, 0)
-            data.Left.Size = UDim2.new(0, BOX_THICKNESS, 1, 0)
-            data.Right.Position = UDim2.new(1, -BOX_THICKNESS, 0, 0)
-            data.Right.Size = UDim2.new(0, BOX_THICKNESS, 1, 0)
-
-            local accent = getAccentColor()
-            data.Top.BackgroundColor3 = accent
-            data.Bottom.BackgroundColor3 = accent
-            data.Left.BackgroundColor3 = accent
-            data.Right.BackgroundColor3 = accent
-
-            data.Box.Visible = true
-        end
-    else
-        for _, data in pairs(Boxes) do
-            data.Box.Visible = false
-        end
-    end
-
-    -- Skeleton ESP
-    if settings.skeletonEspEnabled then
-        for player, data in pairs(Skeletons) do
-            local character = data.Character
-            if not character or not character.Parent then
-                RemoveSkeleton(player)
-                continue
-            end
-            for i, bone in ipairs(data.Bones) do
-                local part1 = character:FindFirstChild(bone[1])
-                local part2 = character:FindFirstChild(bone[2])
-                local line = data.Lines[i]
-                if not part1 or not part2 then
-                    line.Visible = false
-                else
-                    local pos1 = Camera:WorldToViewportPoint(part1.Position)
-                    local pos2 = Camera:WorldToViewportPoint(part2.Position)
-                    if pos1.Z <= 0 or pos2.Z <= 0 then
-                        line.Visible = false
-                    else
-                        local v1 = Vector2.new(pos1.X, pos1.Y)
-                        local v2 = Vector2.new(pos2.X, pos2.Y)
-                        local diff = v2 - v1
-                        local length = diff.Magnitude
-                        if length < 1 then
-                            line.Visible = false
-                        else
-                            local mid = (v1 + v2) / 2
-                            line.Position = UDim2.fromOffset(mid.X, mid.Y)
-                            line.Size = UDim2.fromOffset(length, LINE_WIDTH)
-                            line.Rotation = math.deg(math.atan2(diff.Y, diff.X))
-                            line.BackgroundColor3 = getAccentColor()
-                            line.Visible = true
-                        end
-                    end
-                end
-            end
-        end
-    else
-        for _, data in pairs(Skeletons) do
-            for _, line in ipairs(data.Lines) do
-                line.Visible = false
-            end
-        end
-    end
+if S.boxEspEnabled then
+for p,d in pairs(Bx) do
+local c=p.Character
+local h=c and c:FindFirstChildOfClass("Humanoid")
+local r=c and c:FindFirstChild("HumanoidRootPart")
+if not c or not h or h.Health<=0 or not r then d.Box.Visible=false continue end
+local HE=6 local WI=3.2
+local tw=r.Position+Vector3.new(0,HE/2,0)
+local bw=r.Position-Vector3.new(0,HE/2,0)
+local t=Camera:WorldToViewportPoint(tw)
+local b=Camera:WorldToViewportPoint(bw)
+if t.Z<=0 or b.Z<=0 then d.Box.Visible=false continue end
+local sh=math.abs(t.Y-b.Y)
+local sw=sh*(WI/HE)
+local cx=(t.X+b.X)/2
+local cy=(t.Y+b.Y)/2
+local x=cx-sw/2
+local y=cy-sh/2
+d.Box.Position=UDim2.fromOffset(x,y)
+d.Box.Size=UDim2.fromOffset(sw,sh)
+d.Top.Position=UDim2.fromOffset(0,0) d.Top.Size=UDim2.new(1,0,0,BT)
+d.Bottom.Position=UDim2.new(0,0,1,-BT) d.Bottom.Size=UDim2.new(1,0,0,BT)
+d.Left.Position=UDim2.fromOffset(0,0) d.Left.Size=UDim2.new(0,BT,1,0)
+d.Right.Position=UDim2.new(1,-BT,0,0) d.Right.Size=UDim2.new(0,BT,1,0)
+local ac=ga()
+d.Top.BackgroundColor3=ac d.Bottom.BackgroundColor3=ac d.Left.BackgroundColor3=ac d.Right.BackgroundColor3=ac
+d.Box.Visible=true
+end
+else for _,d in pairs(Bx) do d.Box.Visible=false end end
+if S.skeletonEspEnabled then
+for p,d in pairs(Sk) do
+local c=d.Character
+if not c or not c.Parent then rmSk(p) continue end
+for i,bn in ipairs(d.Bones) do
+local p1=c:FindFirstChild(bn[1])
+local p2=c:FindFirstChild(bn[2])
+local ln=d.Lines[i]
+if not p1 or not p2 then ln.Visible=false
+else
+local ps1=Camera:WorldToViewportPoint(p1.Position)
+local ps2=Camera:WorldToViewportPoint(p2.Position)
+if ps1.Z<=0 or ps2.Z<=0 then ln.Visible=false
+else
+local v1=Vector2.new(ps1.X,ps1.Y)
+local v2=Vector2.new(ps2.X,ps2.Y)
+local df=v2-v1
+local l=df.Magnitude
+if l<1 then ln.Visible=false
+else
+local md=(v1+v2)/2
+ln.Position=UDim2.fromOffset(md.X,md.Y)
+ln.Size=UDim2.fromOffset(l,LW)
+ln.Rotation=math.deg(math.atan2(df.Y,df.X))
+ln.BackgroundColor3=ga()
+ln.Visible=true
+end
+end
+end
+end
+end
+else
+for _,d in pairs(Sk) do for _,l in ipairs(d.Lines) do l.Visible=false end end
+end
 end)
-
 task.spawn(function()
-    while true do
-        task.wait(0.2)
-        if settings.mm2ChamsEnabled then
-            MM2Clear()
-            MM2Build()
-        elseif #mm2Folder:GetChildren() > 0 then
-            MM2Clear()
-        end
-    end
+while true do
+task.wait(0.2)
+if S.mm2ChamsEnabled then mmClr() mmBld()
+elseif #mmF:GetChildren()>0 then mmClr() end
+end
 end)
-
--- ===== ОБЫЧНЫЙ ФУНКЦИОНАЛ =====
-local stretchCFrame = CFrame.new(0,0,0, 1,0,0, 0,settings.STRETCH_FACTOR,0, 0,0,1)
-local particleAttachment, particleEmitter
-local trailFolder, trailCon
-local headlessConnection = nil
-local auraLight = nil
-local auraAttachment = nil
-local deathConnections = {}
-local hatModel = nil
-local hatConnection = nil
-
-local wastedGui, wastedLabel, wastedBandFrame, wastedBlackFrame
-local wastedColorCorrection, wastedBlur, wastedSound
-local wastedConnection = nil
-local wastedEffectRunning = false
-
-local radioSound = nil
-local radioIsPlaying = false
-
-local fpsValue = 60
-local fpsCounter = 0
-local fpsTimer = tick()
+local scF=CFrame.new(0,0,0,1,0,0,0,S.STRETCH_FACTOR,0,0,0,1)
+local ptA,ptE
+local eD={} local eA=0 local eTC=nil
+local skPF,tF,tC
+local hlC=nil
+local auL=nil local auA=nil
+local dC={}
+local htM=nil local htC=nil
+local wGui,wLbl,wBF,wBFk
+local wCC,wBl,wSnd
+local wC=nil local wER=false
+local rSnd=nil local rPlay=false
+local fps=60 local fC=0 local fT=tick()
 RunService.RenderStepped:Connect(function()
-    fpsCounter = fpsCounter + 1
-    if tick() - fpsTimer >= 1 then
-        fpsValue = fpsCounter
-        fpsCounter = 0
-        fpsTimer = tick()
-    end
+fC=fC+1
+if tick()-fT>=1 then fps=fC fC=0 fT=tick() end
 end)
-
-local function ApplyParticles()
-    if particleEmitter then pcall(function() particleEmitter:Destroy() end) particleEmitter = nil end
-    if particleAttachment then pcall(function() particleAttachment:Destroy() end) particleAttachment = nil end
-    if not settings.particlesEnabled then return end
-    local char = Player.Character
-    if not char then char = Player.CharacterAdded:Wait() end
-    local hrp = char:WaitForChild("HumanoidRootPart", 5)
-    if not hrp then return end
-    particleAttachment = Instance.new("Attachment", hrp)
-    particleEmitter = Instance.new("ParticleEmitter")
-    particleEmitter.Texture = "rbxassetid://296874871"
-    particleEmitter.Rate = 0
-    particleEmitter.Lifetime = NumberRange.new(1, 1.8)
-    particleEmitter.Speed = NumberRange.new(3, 6)
-    particleEmitter.SpreadAngle = Vector2.new(180, 180)
-    particleEmitter.Color = ColorSequence.new(getAccentColor())
-    particleEmitter.Size = NumberSequence.new(0.8, 0)
-    particleEmitter.Transparency = NumberSequence.new(0, 1)
-    particleEmitter.Parent = particleAttachment
+local function aFov() Camera.FieldOfView=S.fovEnabled and S.fovValue or 70 end
+local function aP()
+if ptE then pcall(function() ptE:Destroy() end) ptE=nil end
+if ptA then pcall(function() ptA:Destroy() end) ptA=nil end
+if not S.particlesEnabled then return end
+local c=Player.Character
+if not c then c=Player.CharacterAdded:Wait() end
+local hrp=c:WaitForChild("HumanoidRootPart",5)
+if not hrp then return end
+ptA=Instance.new("Attachment",hrp)
+ptE=Instance.new("ParticleEmitter")
+ptE.Texture="rbxassetid://296874871"
+ptE.Rate=0
+ptE.Lifetime=NumberRange.new(1,1.8)
+ptE.Speed=NumberRange.new(3,6)
+ptE.SpreadAngle=Vector2.new(180,180)
+ptE.Color=ColorSequence.new(ga())
+ptE.Size=NumberSequence.new(0.8,0)
+ptE.Transparency=NumberSequence.new(0,1)
+ptE.Parent=ptA
 end
-
-local function ApplyTrails()
-    if trailCon then trailCon:Disconnect() trailCon = nil end
-    if trailFolder then trailFolder:Destroy() trailFolder = nil end
-    if settings.trailsEnabled then
-        trailFolder = Instance.new("Folder")
-        trailFolder.Name = "MonvisualTrails"
-        trailFolder.Parent = workspace
-        trailCon = RunService.Heartbeat:Connect(function()
-            if not settings.trailsEnabled then return end
-            local char = Player.Character
-            if not char then return end
-            local hrp = char:FindFirstChild("HumanoidRootPart")
-            if not hrp then return end
-            local hum = char:FindFirstChildOfClass("Humanoid")
-            if not hum or hum.MoveDirection.Magnitude < 0.1 then return end
-            local trail = Instance.new("Part")
-            trail.Size = Vector3.new(0.5, 3, 0.5)
-            trail.CFrame = hrp.CFrame
-            trail.Anchored = true
-            trail.CanCollide = false
-            trail.Material = Enum.Material.Neon
-            trail.Color = getAccentColor()
-            trail.Transparency = settings.trailsTransparency
-            trail.Parent = trailFolder
-            local tween = TweenService:Create(trail, TweenInfo.new(0.8, Enum.EasingStyle.Linear), {Transparency = 1, Size = Vector3.new(0.2, 0.5, 0.2)})
-            tween:Play()
-            tween.Completed:Connect(function() trail:Destroy() end)
-        end)
-    end
+local function aFog()
+if S.fogEnabled then Lighting.FogEnd=S.fogEnd Lighting.FogStart=S.fogStart Lighting.FogColor=ga()
+else Lighting.FogEnd=100000 Lighting.FogStart=0 end
 end
-
-local function ApplyHeadless()
-    if headlessConnection then headlessConnection:Disconnect() headlessConnection = nil end
-    local function hideHead(character)
-        local head = character:WaitForChild("Head", 5)
-        if not head then return end
-        head.LocalTransparencyModifier = 1
-        for _, obj in ipairs(head:GetDescendants()) do
-            if obj:IsA("Decal") or obj:IsA("Texture") then
-                obj.Transparency = 1
-            elseif obj:IsA("BasePart") then
-                obj.LocalTransparencyModifier = 1
-            end
-        end
-    end
-    local function restoreHead(character)
-        local head = character:FindFirstChild("Head")
-        if not head then return end
-        head.LocalTransparencyModifier = 0
-        for _, obj in ipairs(head:GetDescendants()) do
-            if obj:IsA("Decal") or obj:IsA("Texture") then
-                obj.Transparency = 0
-            elseif obj:IsA("BasePart") then
-                obj.LocalTransparencyModifier = 0
-            end
-        end
-    end
-    if settings.headlessEnabled then
-        if Player.Character then hideHead(Player.Character) end
-        headlessConnection = RunService.Stepped:Connect(function()
-            if not settings.headlessEnabled then return end
-            local char = Player.Character
-            if not char then return end
-            hideHead(char)
-        end)
-    else
-        if Player.Character then restoreHead(Player.Character) end
-    end
+local function aSky()
+local ex=Lighting:FindFirstChild("MonvisualSky")
+if S.skyShaderEnabled then
+if ex then ex:Destroy() end
+local sk=Instance.new("Sky")
+sk.Name="MonvisualSky"
+sk.SkyboxBk="rbxassetid://105721322908215"
+sk.SkyboxDn="rbxassetid://105721322908215"
+sk.SkyboxFt="rbxassetid://105721322908215"
+sk.SkyboxLf="rbxassetid://105721322908215"
+sk.SkyboxRt="rbxassetid://105721322908215"
+sk.SkyboxUp="rbxassetid://105721322908215"
+sk.Parent=Lighting
+else if ex then ex:Destroy() end end
 end
-
-local function ApplyHat()
-    if hatConnection then hatConnection:Disconnect() hatConnection = nil end
-    if hatModel then pcall(function() hatModel:Destroy() end) hatModel = nil end
-    if not settings.hatEnabled then return end
-    local char = Player.Character
-    if not char then return end
-    local head = char:FindFirstChild("Head")
-    if not head then return end
-
-    local hat = Instance.new("Part")
-    hat.Name = "HoloChineseHat"
-    hat.Size = Vector3.new(0.1, 0.1, 0.1)
-    hat.Anchored = false
-    hat.CanCollide = false
-    hat.CastShadow = false
-    hat.Material = Enum.Material.Neon
-    hat.Color = getAccentColor()
-    hat.Transparency = 0.55
-    hat.Parent = char
-    hatModel = hat
-
-    local mesh = Instance.new("SpecialMesh")
-    mesh.MeshType = Enum.MeshType.FileMesh
-    mesh.MeshId = "rbxassetid://1033714"
-    mesh.Scale = Vector3.new(2.1, 1.35, 2.1)
-    mesh.Parent = hat
-
-    local light = Instance.new("PointLight")
-    light.Color = getAccentColor()
-    light.Brightness = 1.1
-    light.Range = 6
-    light.Parent = hat
-
-    local weld = Instance.new("Weld")
-    weld.Part0 = head
-    weld.Part1 = hat
-    weld.C0 = CFrame.new(0, 0.95, 0)
-    weld.Parent = hat
-
-    local startTime = tick()
-    local baseC0 = weld.C0
-
-    hatConnection = RunService.RenderStepped:Connect(function()
-        if not hat or not hat.Parent or not head or not head.Parent then
-            if hatConnection then hatConnection:Disconnect() hatConnection = nil end
-            return
-        end
-        local t = tick() - startTime
-        local rotation = CFrame.Angles(0, math.rad(t * 25), 0)
-        local bob = math.sin(t * 2.2) * 0.06
-        weld.C0 = baseC0 * CFrame.new(0, bob, 0) * rotation
-        hat.Color = getAccentColor()
-        light.Color = getAccentColor()
-    end)
-
-    if char:FindFirstChild("Humanoid") then
-        char.Humanoid.Died:Connect(function()
-            if hatConnection then hatConnection:Disconnect() hatConnection = nil end
-            if hat then pcall(function() hat:Destroy() end) end
-            hatModel = nil
-        end)
-    end
-end
-
-local function ApplyRTX()
-    if settings.rtxShadowsEnabled then
-        Lighting.GlobalShadows = true
-        Lighting.ShadowSoftness = 1 - settings.rtxShadowsIntensity
-        Lighting.Brightness = 2.5
-        Lighting.OutdoorAmbient = Color3.fromRGB(90, 90, 110)
-        Lighting.Ambient = Color3.fromRGB(60, 60, 80)
-        local atmo = Lighting:FindFirstChild("MonvisualAtmo")
-        if not atmo then
-            atmo = Instance.new("Atmosphere")
-            atmo.Name = "MonvisualAtmo"
-            atmo.Density = 0.35
-            atmo.Offset = 0.1
-            atmo.Color = Color3.fromRGB(180, 180, 200)
-            atmo.Decay = Color3.fromRGB(100, 100, 130)
-            atmo.Glare = 0.2
-            atmo.Haze = 1.5
-            atmo.Parent = Lighting
-        end
-        local sun = Lighting:FindFirstChild("MonvisualSun")
-        if not sun then
-            sun = Instance.new("SunRaysEffect")
-            sun.Name = "MonvisualSun"
-            sun.Intensity = 0.1
-            sun.Spread = 1
-            sun.Parent = Lighting
-        end
-    else
-        Lighting.GlobalShadows = true
-        Lighting.ShadowSoftness = 0.4
-        Lighting.Brightness = 1
-        local atmo = Lighting:FindFirstChild("MonvisualAtmo")
-        if atmo then atmo:Destroy() end
-        local sun = Lighting:FindFirstChild("MonvisualSun")
-        if sun then sun:Destroy() end
-    end
-    if settings.rtxReflectionsEnabled then
-        Lighting.EnvironmentDiffuseScale = 1
-        Lighting.EnvironmentSpecularScale = 1
-    else
-        Lighting.EnvironmentDiffuseScale = 0
-        Lighting.EnvironmentSpecularScale = 0
-    end
-end
-
-local function ApplyGlow()
-    local existing = Lighting:FindFirstChild("MonvisualBloom")
-    if settings.glowEnabled then
-        if not existing then
-            existing = Instance.new("BloomEffect")
-            existing.Name = "MonvisualBloom"
-            existing.Parent = Lighting
-        end
-        existing.Intensity = settings.glowIntensity
-        existing.Size = 40
-        existing.Threshold = 0.1
-        existing.Enabled = true
-    else
-        if existing then existing:Destroy() end
-    end
-end
-
-local function ApplyAura()
-    if auraLight then pcall(function() auraLight:Destroy() end) auraLight = nil end
-    if auraAttachment then pcall(function() auraAttachment:Destroy() end) auraAttachment = nil end
-    if not settings.auraEnabled then return end
-    local char = Player.Character
-    if not char then return end
-    local hrp = char:FindFirstChild("HumanoidRootPart")
-    if not hrp then return end
-    auraAttachment = Instance.new("Attachment", hrp)
-    auraLight = Instance.new("PointLight", auraAttachment)
-    auraLight.Brightness = settings.auraBrightness
-    auraLight.Range = settings.auraRange
-    auraLight.Color = settings.auraColorUseTheme and getAccentColor() or WHITE
-    auraLight.Shadows = false
-end
-
-local function ApplyDayNight()
-    if settings.dayNightEnabled then
-        Lighting.ClockTime = settings.dayNightTime
-        Lighting.Brightness = (settings.dayNightTime >= 6 and settings.dayNightTime <= 18) and 2 or 0.5
-        Lighting.OutdoorAmbient = (settings.dayNightTime >= 6 and settings.dayNightTime <= 18) and Color3.fromRGB(120,120,140) or Color3.fromRGB(30,30,50)
-    else
-        Lighting.ClockTime = 14
-        Lighting.Brightness = 1
-        Lighting.OutdoorAmbient = Color3.fromRGB(70, 70, 70)
-    end
-end
-
--- Death Effect
-local function playDeathEffect(character)
-    local root = character:FindFirstChild("HumanoidRootPart")
-    if not root then return end
-    local position = root.Position
-
-    local fogPart = Instance.new("Part")
-    fogPart.Name = "DeathFog"
-    fogPart.Size = Vector3.new(1, 1, 1)
-    fogPart.Position = position - Vector3.new(0, 2, 0)
-    fogPart.Anchored = true
-    fogPart.CanCollide = false
-    fogPart.CanTouch = false
-    fogPart.CanQuery = false
-    fogPart.Transparency = 1
-    fogPart.Parent = workspace
-
-    local fogAttachment = Instance.new("Attachment")
-    fogAttachment.Parent = fogPart
-
-    local smoke = Instance.new("ParticleEmitter")
-    smoke.Texture = "rbxasset://textures/particles/smoke_main.dds"
-    smoke.Rate = 0
-    smoke.Lifetime = NumberRange.new(1, 1.5)
-    smoke.Speed = NumberRange.new(0.2, 0.8)
-    smoke.SpreadAngle = Vector2.new(180, 180)
-    smoke.Rotation = NumberRange.new(0, 360)
-    smoke.RotSpeed = NumberRange.new(-25, 25)
-    smoke.Color = ColorSequence.new(getAccentColor())
-    smoke.Size = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 2),
-        NumberSequenceKeypoint.new(0.3, 4),
-        NumberSequenceKeypoint.new(0.7, 5),
-        NumberSequenceKeypoint.new(1, 6)
-    })
-    smoke.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.2),
-        NumberSequenceKeypoint.new(0.5, 0.35),
-        NumberSequenceKeypoint.new(0.8, 0.65),
-        NumberSequenceKeypoint.new(1, 1)
-    })
-    smoke.Parent = fogAttachment
-    smoke:Emit(70)
-    Debris:AddItem(fogPart, 1.5)
-
-    local rayParams = RaycastParams.new()
-    rayParams.FilterType = Enum.RaycastFilterType.Exclude
-    rayParams.FilterDescendantsInstances = {character}
-    local rayResult = workspace:Raycast(position + Vector3.new(0, 2, 0), Vector3.new(0, -20, 0), rayParams)
-    local groundY
-    if rayResult then groundY = rayResult.Position.Y else groundY = position.Y - 3 end
-
-    local diameter = 0.8
-    local finalHeight = 30
-    local pillar = Instance.new("Part")
-    pillar.Name = "DeathPillar"
-    pillar.Shape = Enum.PartType.Cylinder
-    pillar.Size = Vector3.new(0.1, diameter, diameter)
-    pillar.Anchored = true
-    pillar.CanCollide = false
-    pillar.CanTouch = false
-    pillar.CanQuery = false
-    pillar.Material = Enum.Material.Neon
-    pillar.Color = getAccentColor()
-    pillar.Transparency = 0.05
-    pillar.CFrame = CFrame.new(position.X, groundY + 0.05, position.Z) * CFrame.Angles(0, 0, math.rad(90))
-    pillar.Parent = workspace
-
-    local pillarFog = Instance.new("Part")
-    pillarFog.Name = "PillarFog"
-    pillarFog.Size = Vector3.new(1, 1, 1)
-    pillarFog.Position = Vector3.new(position.X, groundY, position.Z)
-    pillarFog.Anchored = true
-    pillarFog.CanCollide = false
-    pillarFog.CanTouch = false
-    pillarFog.CanQuery = false
-    pillarFog.Transparency = 1
-    pillarFog.Parent = workspace
-
-    local pillarAttachment = Instance.new("Attachment")
-    pillarAttachment.Parent = pillarFog
-
-    local pillarSmoke = Instance.new("ParticleEmitter")
-    pillarSmoke.Texture = "rbxasset://textures/particles/smoke_main.dds"
-    pillarSmoke.Rate = 8
-    pillarSmoke.Lifetime = NumberRange.new(0.7, 1.2)
-    pillarSmoke.Speed = NumberRange.new(0.5, 1.5)
-    pillarSmoke.SpreadAngle = Vector2.new(15, 15)
-    pillarSmoke.Rotation = NumberRange.new(0, 360)
-    pillarSmoke.RotSpeed = NumberRange.new(-15, 15)
-    pillarSmoke.Color = ColorSequence.new(getAccentColor())
-    pillarSmoke.Size = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.6),
-        NumberSequenceKeypoint.new(0.5, 1),
-        NumberSequenceKeypoint.new(1, 1.5)
-    })
-    pillarSmoke.Transparency = NumberSequence.new({
-        NumberSequenceKeypoint.new(0, 0.75),
-        NumberSequenceKeypoint.new(0.6, 0.85),
-        NumberSequenceKeypoint.new(1, 1)
-    })
-    pillarSmoke.Parent = pillarAttachment
-
-    TweenService:Create(pillar, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        Size = Vector3.new(finalHeight, diameter, diameter),
-        CFrame = CFrame.new(position.X, groundY + finalHeight / 2, position.Z) * CFrame.Angles(0, 0, math.rad(90)),
-        Transparency = 1
-    }):Play()
-
-    TweenService:Create(pillarFog, TweenInfo.new(1, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-        Size = Vector3.new(4, finalHeight, 4),
-        Position = Vector3.new(position.X, groundY + finalHeight / 2, position.Z)
-    }):Play()
-
-    task.delay(0.5, function()
-        if not character or not character.Parent then return end
-        for _, object in ipairs(character:GetDescendants()) do
-            if object:IsA("BasePart") then
-                object.Transparency = 1
-                object.CanCollide = false
-            elseif object:IsA("Decal") or object:IsA("Texture") then
-                object.Transparency = 1
-            elseif object:IsA("ParticleEmitter") or object:IsA("Trail") or object:IsA("Beam") then
-                object.Enabled = false
-            end
-        end
-    end)
-
-    task.delay(1.5, function()
-        if pillar and pillar.Parent then pillar:Destroy() end
-        if pillarFog and pillarFog.Parent then pillarFog:Destroy() end
-        if character and character.Parent then character:Destroy() end
-    end)
-end
-
-local function ApplyDeathEffect()
-    for _, c in ipairs(deathConnections) do
-        pcall(function() c:Disconnect() end)
-    end
-    deathConnections = {}
-    if not settings.deathEffectEnabled then return end
-    local function setupCharacter(character)
-        local humanoid = character:WaitForChild("Humanoid", 5)
-        if not humanoid then return end
-        local conn = humanoid.Died:Connect(function()
-            if settings.deathEffectEnabled then
-                playDeathEffect(character)
-            end
-        end)
-        table.insert(deathConnections, conn)
-    end
-    local function setupPlayer(player)
-        if player == Player then return end
-        local c1 = player.CharacterAdded:Connect(setupCharacter)
-        table.insert(deathConnections, c1)
-        if player.Character then setupCharacter(player.Character) end
-    end
-    local c2 = Players.PlayerAdded:Connect(setupPlayer)
-    table.insert(deathConnections, c2)
-    for _, player in ipairs(Players:GetPlayers()) do
-        setupPlayer(player)
-    end
-end
-
--- GTA Wasted
-local function resetWastedEffect()
-    if not wastedGui then return end
-    if wastedLabel then TweenService:Create(wastedLabel, TweenInfo.new(0.3), {TextTransparency = 1}):Play() end
-    if wastedBandFrame then TweenService:Create(wastedBandFrame, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play() end
-    if wastedBlackFrame then TweenService:Create(wastedBlackFrame, TweenInfo.new(0.3), {BackgroundTransparency = 1}):Play() end
-    if wastedBlur then TweenService:Create(wastedBlur, TweenInfo.new(0.3), {Size = 0}):Play() end
-    if wastedColorCorrection then
-        wastedColorCorrection.Saturation = 0
-        wastedColorCorrection.Contrast = 0
-        wastedColorCorrection.Brightness = 0
-    end
-    task.delay(0.35, function()
-        if wastedColorCorrection then wastedColorCorrection.Enabled = false end
-        if wastedBlur then wastedBlur.Enabled = false end
-    end)
-end
-
-local function playWastedEffect(character)
-    if wastedEffectRunning then return end
-    wastedEffectRunning = true
-    if wastedSound then wastedSound:Play() end
-    if wastedColorCorrection then
-        wastedColorCorrection.Enabled = true
-        wastedColorCorrection.Saturation = -1
-        wastedColorCorrection.Contrast = 1.2
-        wastedColorCorrection.Brightness = -0.25
-    end
-    if wastedBlur then
-        wastedBlur.Enabled = true
-        wastedBlur.Size = 0
-    end
-    if wastedBlackFrame then
-        TweenService:Create(wastedBlackFrame, TweenInfo.new(0.6, Enum.EasingStyle.Quad), {BackgroundTransparency = 0.4}):Play()
-    end
-    if wastedBandFrame then
-        TweenService:Create(wastedBandFrame, TweenInfo.new(0.6, Enum.EasingStyle.Quad), {BackgroundTransparency = 0.35}):Play()
-    end
-    if wastedBlur then
-        task.delay(0.2, function()
-            TweenService:Create(wastedBlur, TweenInfo.new(0.8, Enum.EasingStyle.Sine), {Size = 24}):Play()
-        end)
-    end
-    task.wait(0.2)
-    if wastedLabel then
-        TweenService:Create(wastedLabel, TweenInfo.new(0.5, Enum.EasingStyle.Back), {TextTransparency = 0}):Play()
-    end
-    local startTime = tick()
-    local duration = 3.5
-    if wastedConnection then wastedConnection:Disconnect() end
-    wastedConnection = RunService.RenderStepped:Connect(function()
-        local elapsed = tick() - startTime
-        if elapsed > duration then
-            if wastedConnection then wastedConnection:Disconnect() wastedConnection = nil end
-            return
-        end
-        if not character or not character.Parent then return end
-        local root = character:FindFirstChild("HumanoidRootPart")
-            or character:FindFirstChild("UpperTorso")
-            or character:FindFirstChild("Torso")
-            or character:FindFirstChild("Head")
-        if not root then return end
-        local t = math.clamp(elapsed / duration, 0, 1)
-        local eased = 1 - (1 - t) * (1 - t)
-        local height = eased * 12
-        local angle = elapsed * 0.55
-        local radius = 8 + eased * 4
-        local focus = root.Position
-        local offset = Vector3.new(math.sin(angle) * radius, height + 3, math.cos(angle) * radius)
-        Camera.CFrame = CFrame.new(focus + offset, focus)
-        Camera.Focus = CFrame.new(focus)
-    end)
-    task.delay(duration + 0.2, function()
-        if wastedConnection then wastedConnection:Disconnect() wastedConnection = nil end
-        resetWastedEffect()
-        wastedEffectRunning = false
-    end)
-end
-
-local function ApplyWasted()
-    if wastedConnection then wastedConnection:Disconnect() wastedConnection = nil end
-    if wastedGui then pcall(function() wastedGui:Destroy() end) wastedGui = nil end
-    if wastedColorCorrection then pcall(function() wastedColorCorrection:Destroy() end) wastedColorCorrection = nil end
-    if wastedBlur then pcall(function() wastedBlur:Destroy() end) wastedBlur = nil end
-    if wastedSound then pcall(function() wastedSound:Destroy() end) wastedSound = nil end
-    if not settings.wastedEnabled then return end
-
-    wastedGui = Instance.new("ScreenGui")
-    wastedGui.Name = "WastedGui"
-    wastedGui.IgnoreGuiInset = true
-    wastedGui.ResetOnSpawn = false
-    wastedGui.Parent = Player:WaitForChild("PlayerGui")
-
-    wastedBlackFrame = Instance.new("Frame")
-    wastedBlackFrame.Size = UDim2.new(1, 0, 1, 0)
-    wastedBlackFrame.BackgroundColor3 = BLACK
-    wastedBlackFrame.BackgroundTransparency = 1
-    wastedBlackFrame.BorderSizePixel = 0
-    wastedBlackFrame.ZIndex = 1
-    wastedBlackFrame.Parent = wastedGui
-
-    wastedBandFrame = Instance.new("Frame")
-    wastedBandFrame.Size = UDim2.new(1, 0, 0.18, 0)
-    wastedBandFrame.Position = UDim2.new(0, 0, 0.41, 0)
-    wastedBandFrame.BackgroundColor3 = BLACK
-    wastedBandFrame.BackgroundTransparency = 1
-    wastedBandFrame.BorderSizePixel = 0
-    wastedBandFrame.ZIndex = 2
-    wastedBandFrame.Parent = wastedGui
-
-    wastedLabel = Instance.new("TextLabel")
-    wastedLabel.Size = UDim2.new(0.6, 0, 1, 0)
-    wastedLabel.Position = UDim2.new(0.2, 0, 0, 0)
-    wastedLabel.BackgroundTransparency = 1
-    wastedLabel.Text = "WASTED"
-    wastedLabel.TextColor3 = Color3.fromRGB(180, 0, 0)
-    wastedLabel.TextStrokeTransparency = 0.3
-    wastedLabel.TextStrokeColor3 = BLACK
-    wastedLabel.Font = Enum.Font.GothamBold
-    wastedLabel.TextScaled = true
-    wastedLabel.TextTransparency = 1
-    wastedLabel.ZIndex = 3
-    wastedLabel.Parent = wastedBandFrame
-
-    wastedColorCorrection = Instance.new("ColorCorrectionEffect")
-    wastedColorCorrection.Name = "WastedEffect"
-    wastedColorCorrection.Enabled = false
-    wastedColorCorrection.Parent = Lighting
-
-    wastedBlur = Instance.new("BlurEffect")
-    wastedBlur.Name = "WastedBlur"
-    wastedBlur.Size = 0
-    wastedBlur.Enabled = false
-    wastedBlur.Parent = Lighting
-
-    wastedSound = Instance.new("Sound")
-    wastedSound.Name = "WastedSound"
-    wastedSound.SoundId = "rbxassetid://5256796890"
-    wastedSound.Volume = 1.5
-    wastedSound.PlaybackSpeed = 1
-    wastedSound.Parent = SoundService
-
-    local function setupChar(char)
-        local hum = char:WaitForChild("Humanoid", 5)
-        if not hum then return end
-        hum.Died:Connect(function()
-            if settings.wastedEnabled then
-                playWastedEffect(char)
-            end
-        end)
-    end
-    if Player.Character then setupChar(Player.Character) end
-    Player.CharacterAdded:Connect(function(char)
-        task.wait(1)
-        if settings.wastedEnabled then setupChar(char) end
-    end)
-end
-
--- Radio
-local function stopRadio()
-    if radioSound then
-        pcall(function() radioSound:Stop() end)
-        pcall(function() radioSound:Destroy() end)
-        radioSound = nil
-    end
-    radioIsPlaying = false
-end
-
-local function playRadioIndex(index)
-    if #radioSongs == 0 then return end
-    if index < 1 then index = #radioSongs end
-    if index > #radioSongs then index = 1 end
-    radioCurrentIndex = index
-    stopRadio()
-    local song = radioSongs[index]
-    radioSound = Instance.new("Sound")
-    radioSound.Name = "MonvisualRadioSound"
-    radioSound.SoundId = "rbxassetid://" .. tostring(song.id)
-    radioSound.Volume = radioVolume
-    radioSound.Looped = false
-    radioSound.Parent = SoundService
-    radioSound:Play()
-    radioIsPlaying = true
-    radioSound.Ended:Connect(function()
-        if not radioIsPlaying then return end
-        if radioLoop then
-            playRadioIndex(radioCurrentIndex)
-        else
-            if radioCurrentIndex < #radioSongs then
-                playRadioIndex(radioCurrentIndex + 1)
-            else
-                stopRadio()
-            end
-        end
-    end)
-end
-
-local function toggleRadioPlay()
-    if radioIsPlaying then
-        stopRadio()
-    else
-        if #radioSongs > 0 then
-            playRadioIndex(radioCurrentIndex > 0 and radioCurrentIndex or 1)
-        end
-    end
-end
-
+local function aSP()
+if S.skyParticlesEnabled then
+if skPF then skPF:Destroy() end
+skPF=Instance.new("Folder")
+skPF.Name="MonvisualSkyParticles"
+skPF.Parent=workspace
 task.spawn(function()
-    if not Player.Character then Player.CharacterAdded:Wait() end
-    task.wait(0.5)
-    ApplyParticles() ApplyTrails() ApplyHeadless() ApplyRTX() ApplyGlow() ApplyAura() ApplyDayNight() ApplyDeathEffect() ApplyHat() ApplyWasted()
+while S.skyParticlesEnabled do
+local c=Player.Character
+if c then
+local hrp=c:FindFirstChild("HumanoidRootPart")
+if hrp then
+local cn=math.max(1,math.floor(S.skyParticlesDensity))
+for i=1,cn do
+local d=Instance.new("Part")
+d.Size=Vector3.new(0.5,0.5,0.5)
+d.CFrame=CFrame.new(hrp.Position+Vector3.new(math.random(-40,40),math.random(20,60),math.random(-40,40)))*CFrame.Angles(math.rad(45),math.rad(45),0)
+d.Anchored=true d.CanCollide=false d.Material=Enum.Material.Neon d.Color=ga() d.Transparency=0.3 d.Parent=skPF
+local tw=TweenService:Create(d,TweenInfo.new(2,Enum.EasingStyle.Linear),{Position=d.Position+Vector3.new(0,-20,0),Transparency=1})
+tw:Play()
+tw.Completed:Connect(function() d:Destroy() end)
+end
+end
+end
+task.wait(0.15)
+end
+if skPF then skPF:Destroy() skPF=nil end
+end)
+else if skPF then skPF:Destroy() skPF=nil end end
+end
+local function aT()
+if tC then tC:Disconnect() tC=nil end
+if tF then tF:Destroy() tF=nil end
+if S.trailsEnabled then
+tF=Instance.new("Folder")
+tF.Name="MonvisualTrails"
+tF.Parent=workspace
+tC=RunService.Heartbeat:Connect(function()
+if not S.trailsEnabled then return end
+local c=Player.Character
+if not c then return end
+local hrp=c:FindFirstChild("HumanoidRootPart")
+if not hrp then return end
+local h=c:FindFirstChildOfClass("Humanoid")
+if not h or h.MoveDirection.Magnitude<0.1 then return end
+local tr=Instance.new("Part")
+tr.Size=Vector3.new(0.5,3,0.5)
+tr.CFrame=hrp.CFrame
+tr.Anchored=true tr.CanCollide=false tr.Material=Enum.Material.Neon tr.Color=ga() tr.Transparency=S.trailsTransparency
+tr.Parent=tF
+local tw=TweenService:Create(tr,TweenInfo.new(0.8,Enum.EasingStyle.Linear),{Transparency=1,Size=Vector3.new(0.2,0.5,0.2)})
+tw:Play()
+tw.Completed:Connect(function() tr:Destroy() end)
+end)
+end
+end
+local function aHl()
+if hlC then hlC:Disconnect() hlC=nil end
+local function hide(c)
+local hd=c:WaitForChild("Head",5)
+if not hd then return end
+hd.LocalTransparencyModifier=1
+for _,o in ipairs(hd:GetDescendants()) do
+if o:IsA("Decal") or o:IsA("Texture") then o.Transparency=1
+elseif o:IsA("BasePart") then o.LocalTransparencyModifier=1 end
+end
+end
+local function rest(c)
+local hd=c:FindFirstChild("Head")
+if not hd then return end
+hd.LocalTransparencyModifier=0
+for _,o in ipairs(hd:GetDescendants()) do
+if o:IsA("Decal") or o:IsA("Texture") then o.Transparency=0
+elseif o:IsA("BasePart") then o.LocalTransparencyModifier=0 end
+end
+end
+if S.headlessEnabled then
+if Player.Character then hide(Player.Character) end
+hlC=RunService.Stepped:Connect(function()
+if not S.headlessEnabled then return end
+local c=Player.Character
+if not c then return end
+hide(c)
+end)
+else if Player.Character then rest(Player.Character) end end
+end
+local function aHt()
+if htC then htC:Disconnect() htC=nil end
+if htM then pcall(function() htM:Destroy() end) htM=nil end
+if not S.hatEnabled then return end
+local c=Player.Character
+if not c then return end
+local hd=c:FindFirstChild("Head")
+if not hd then return end
+local ht=Instance.new("Part")
+ht.Name="HoloChineseHat"
+ht.Size=Vector3.new(0.1,0.1,0.1)
+ht.Anchored=false ht.CanCollide=false ht.CastShadow=false ht.Material=Enum.Material.Neon ht.Color=ga() ht.Transparency=0.55 ht.Parent=c
+htM=ht
+local m=Instance.new("SpecialMesh")
+m.MeshType=Enum.MeshType.FileMesh
+m.MeshId="rbxassetid://1033714"
+m.Scale=Vector3.new(2.1,1.35,2.1)
+m.Parent=ht
+local lg=Instance.new("PointLight")
+lg.Color=ga() lg.Brightness=1.1 lg.Range=6 lg.Parent=ht
+local wd=Instance.new("Weld")
+wd.Part0=hd wd.Part1=ht wd.C0=CFrame.new(0,0.95,0) wd.Parent=ht
+local st=tick() local bC=wd.C0
+htC=RunService.RenderStepped:Connect(function()
+if not ht or not ht.Parent or not hd or not hd.Parent then
+if htC then htC:Disconnect() htC=nil end
+return
+end
+local t=tick()-st
+local rt=CFrame.Angles(0,math.rad(t*25),0)
+local bb=math.sin(t*2.2)*0.06
+wd.C0=bC*CFrame.new(0,bb,0)*rt
+ht.Color=ga() lg.Color=ga()
+end)
+if c:FindFirstChild("Humanoid") then
+c.Humanoid.Died:Connect(function()
+if htC then htC:Disconnect() htC=nil end
+if ht then pcall(function() ht:Destroy() end) end
+htM=nil
+end)
+end
+end
+local function aRTX()
+if S.rtxShadowsEnabled then
+Lighting.GlobalShadows=true
+Lighting.ShadowSoftness=1-S.rtxShadowsIntensity
+Lighting.Brightness=2.5
+Lighting.OutdoorAmbient=Color3.fromRGB(90,90,110)
+Lighting.Ambient=Color3.fromRGB(60,60,80)
+local at=Lighting:FindFirstChild("MonvisualAtmo")
+if not at then
+at=Instance.new("Atmosphere")
+at.Name="MonvisualAtmo" at.Density=0.35 at.Offset=0.1 at.Color=Color3.fromRGB(180,180,200) at.Decay=Color3.fromRGB(100,100,130) at.Glare=0.2 at.Haze=1.5 at.Parent=Lighting
+end
+local sn=Lighting:FindFirstChild("MonvisualSun")
+if not sn then
+sn=Instance.new("SunRaysEffect") sn.Name="MonvisualSun" sn.Intensity=0.1 sn.Spread=1 sn.Parent=Lighting
+end
+else
+Lighting.GlobalShadows=true Lighting.ShadowSoftness=0.4 Lighting.Brightness=1
+local at=Lighting:FindFirstChild("MonvisualAtmo") if at then at:Destroy() end
+local sn=Lighting:FindFirstChild("MonvisualSun") if sn then sn:Destroy() end
+end
+if S.rtxReflectionsEnabled then
+Lighting.EnvironmentDiffuseScale=1 Lighting.EnvironmentSpecularScale=1
+else
+Lighting.EnvironmentDiffuseScale=0 Lighting.EnvironmentSpecularScale=0
+end
+end
+local function aGl()
+local ex=Lighting:FindFirstChild("MonvisualBloom")
+if S.glowEnabled then
+if not ex then ex=Instance.new("BloomEffect") ex.Name="MonvisualBloom" ex.Parent=Lighting end
+ex.Intensity=S.glowIntensity ex.Size=40 ex.Threshold=0.1 ex.Enabled=true
+else if ex then ex:Destroy() end end
+end
+local function aAu()
+if auL then pcall(function() auL:Destroy() end) auL=nil end
+if auA then pcall(function() auA:Destroy() end) auA=nil end
+if not S.auraEnabled then return end
+local c=Player.Character
+if not c then return end
+local hrp=c:FindFirstChild("HumanoidRootPart")
+if not hrp then return end
+auA=Instance.new("Attachment",hrp)
+auL=Instance.new("PointLight",auA)
+auL.Brightness=S.auraBrightness
+auL.Range=S.auraRange
+auL.Color=S.auraColorUseTheme and ga() or WHITE
+auL.Shadows=false
+end
+local function aDN()
+if S.dayNightEnabled then
+Lighting.ClockTime=S.dayNightTime
+Lighting.Brightness=(S.dayNightTime>=6 and S.dayNightTime<=18) and 2 or 0.5
+Lighting.OutdoorAmbient=(S.dayNightTime>=6 and S.dayNightTime<=18) and Color3.fromRGB(120,120,140) or Color3.fromRGB(30,30,50)
+else
+Lighting.ClockTime=14 Lighting.Brightness=1 Lighting.OutdoorAmbient=Color3.fromRGB(70,70,70)
+end
+end
+local function pDE(ch)
+local r=ch:FindFirstChild("HumanoidRootPart")
+if not r then return end
+local ps=r.Position
+local fp=Instance.new("Part")
+fp.Name="DeathFog" fp.Size=Vector3.new(1,1,1) fp.Position=ps-Vector3.new(0,2,0) fp.Anchored=true fp.CanCollide=false fp.CanTouch=false fp.CanQuery=false fp.Transparency=1 fp.Parent=workspace
+local fa=Instance.new("Attachment") fa.Parent=fp
+local sm=Instance.new("ParticleEmitter")
+sm.Texture="rbxasset://textures/particles/smoke_main.dds"
+sm.Rate=0 sm.Lifetime=NumberRange.new(1,1.5) sm.Speed=NumberRange.new(0.2,0.8) sm.SpreadAngle=Vector2.new(180,180) sm.Rotation=NumberRange.new(0,360) sm.RotSpeed=NumberRange.new(-25,25)
+sm.Color=ColorSequence.new(ga())
+sm.Size=NumberSequence.new({NumberSequenceKeypoint.new(0,2),NumberSequenceKeypoint.new(0.3,4),NumberSequenceKeypoint.new(0.7,5),NumberSequenceKeypoint.new(1,6)})
+sm.Transparency=NumberSequence.new({NumberSequenceKeypoint.new(0,0.2),NumberSequenceKeypoint.new(0.5,0.35),NumberSequenceKeypoint.new(0.8,0.65),NumberSequenceKeypoint.new(1,1)})
+sm.Parent=fa
+sm:Emit(70)
+Debris:AddItem(fp,1.5)
+local rp=RaycastParams.new()
+rp.FilterType=Enum.RaycastFilterType.Exclude
+rp.FilterDescendantsInstances={ch}
+local rr=workspace:Raycast(ps+Vector3.new(0,2,0),Vector3.new(0,-20,0),rp)
+local gy
+if rr then gy=rr.Position.Y else gy=ps.Y-3 end
+local dm=0.8 local fh=30
+local pl=Instance.new("Part")
+pl.Name="DeathPillar" pl.Shape=Enum.PartType.Cylinder pl.Size=Vector3.new(0.1,dm,dm) pl.Anchored=true pl.CanCollide=false pl.CanTouch=false pl.CanQuery=false pl.Material=Enum.Material.Neon pl.Color=ga() pl.Transparency=0.05
+pl.CFrame=CFrame.new(ps.X,gy+0.05,ps.Z)*CFrame.Angles(0,0,math.rad(90))
+pl.Parent=workspace
+local pf=Instance.new("Part")
+pf.Name="PillarFog" pf.Size=Vector3.new(1,1,1) pf.Position=Vector3.new(ps.X,gy,ps.Z) pf.Anchored=true pf.CanCollide=false pf.CanTouch=false pf.CanQuery=false pf.Transparency=1 pf.Parent=workspace
+local pa=Instance.new("Attachment") pa.Parent=pf
+local psm=Instance.new("ParticleEmitter")
+psm.Texture="rbxasset://textures/particles/smoke_main.dds"
+psm.Rate=8 psm.Lifetime=NumberRange.new(0.7,1.2) psm.Speed=NumberRange.new(0.5,1.5) psm.SpreadAngle=Vector2.new(15,15) psm.Rotation=NumberRange.new(0,360) psm.RotSpeed=NumberRange.new(-15,15)
+psm.Color=ColorSequence.new(ga())
+psm.Size=NumberSequence.new({NumberSequenceKeypoint.new(0,0.6),NumberSequenceKeypoint.new(0.5,1),NumberSequenceKeypoint.new(1,1.5)})
+psm.Transparency=NumberSequence.new({NumberSequenceKeypoint.new(0,0.75),NumberSequenceKeypoint.new(0.6,0.85),NumberSequenceKeypoint.new(1,1)})
+psm.Parent=pa
+TweenService:Create(pl,TweenInfo.new(1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Size=Vector3.new(fh,dm,dm),CFrame=CFrame.new(ps.X,gy+fh/2,ps.Z)*CFrame.Angles(0,0,math.rad(90)),Transparency=1}):Play()
+TweenService:Create(pf,TweenInfo.new(1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Size=Vector3.new(4,fh,4),Position=Vector3.new(ps.X,gy+fh/2,ps.Z)}):Play()
+task.delay(0.5,function()
+if not ch or not ch.Parent then return end
+for _,o in ipairs(ch:GetDescendants()) do
+if o:IsA("BasePart") then o.Transparency=1 o.CanCollide=false
+elseif o:IsA("Decal") or o:IsA("Texture") then o.Transparency=1
+elseif o:IsA("ParticleEmitter") or o:IsA("Trail") or o:IsA("Beam") then o.Enabled=false end
+end
+end)
+task.delay(1.5,function()
+if pl and pl.Parent then pl:Destroy() end
+if pf and pf.Parent then pf:Destroy() end
+if ch and ch.Parent then ch:Destroy() end
+end)
+end
+local function aDE()
+for _,c in ipairs(dC) do pcall(function() c:Disconnect() end) end
+dC={}
+if not S.deathEffectEnabled then return end
+local function suC(ch)
+local h=ch:WaitForChild("Humanoid",5)
+if not h then return end
+local co=h.Died:Connect(function() if S.deathEffectEnabled then pDE(ch) end end)
+table.insert(dC,co)
+end
+local function suP(p)
+if p==Player then return end
+local c1=p.CharacterAdded:Connect(suC)
+table.insert(dC,c1)
+if p.Character then suC(p.Character) end
+end
+local c2=Players.PlayerAdded:Connect(suP)
+table.insert(dC,c2)
+for _,p in ipairs(Players:GetPlayers()) do suP(p) end
+end
+local function rWE()
+if not wGui then return end
+if wLbl then TweenService:Create(wLbl,TweenInfo.new(0.3),{TextTransparency=1}):Play() end
+if wBF then TweenService:Create(wBF,TweenInfo.new(0.3),{BackgroundTransparency=1}):Play() end
+if wBFk then TweenService:Create(wBFk,TweenInfo.new(0.3),{BackgroundTransparency=1}):Play() end
+if wBl then TweenService:Create(wBl,TweenInfo.new(0.3),{Size=0}):Play() end
+if wCC then wCC.Saturation=0 wCC.Contrast=0 wCC.Brightness=0 end
+task.delay(0.35,function()
+if wCC then wCC.Enabled=false end
+if wBl then wBl.Enabled=false end
+end)
+end
+local function pWE(ch)
+if wER then return end
+wER=true
+if wSnd then wSnd:Play() end
+if wCC then wCC.Enabled=true wCC.Saturation=-1 wCC.Contrast=1.2 wCC.Brightness=-0.25 end
+if wBl then wBl.Enabled=true wBl.Size=0 end
+if wBFk then TweenService:Create(wBFk,TweenInfo.new(0.6,Enum.EasingStyle.Quad),{BackgroundTransparency=0.4}):Play() end
+if wBF then TweenService:Create(wBF,TweenInfo.new(0.6,Enum.EasingStyle.Quad),{BackgroundTransparency=0.35}):Play() end
+if wBl then task.delay(0.2,function() TweenService:Create(wBl,TweenInfo.new(0.8,Enum.EasingStyle.Sine),{Size=24}):Play() end) end
+task.wait(0.2)
+if wLbl then TweenService:Create(wLbl,TweenInfo.new(0.5,Enum.EasingStyle.Back),{TextTransparency=0}):Play() end
+local st=tick() local dr=3.5
+if wC then wC:Disconnect() end
+wC=RunService.RenderStepped:Connect(function()
+local el=tick()-st
+if el>dr then if wC then wC:Disconnect() wC=nil end return end
+if not ch or not ch.Parent then return end
+local r=ch:FindFirstChild("HumanoidRootPart") or ch:FindFirstChild("UpperTorso") or ch:FindFirstChild("Torso") or ch:FindFirstChild("Head")
+if not r then return end
+local t=math.clamp(el/dr,0,1)
+local ea=1-(1-t)*(1-t)
+local ht=ea*12
+local an=el*0.55
+local rd=8+ea*4
+local fc=r.Position
+local of=Vector3.new(math.sin(an)*rd,ht+3,math.cos(an)*rd)
+Camera.CFrame=CFrame.new(fc+of,fc)
+Camera.Focus=CFrame.new(fc)
+end)
+task.delay(dr+0.2,function()
+if wC then wC:Disconnect() wC=nil end
+rWE() wER=false
+end)
+end
+local function aW()
+if wC then wC:Disconnect() wC=nil end
+if wGui then pcall(function() wGui:Destroy() end) wGui=nil end
+if wCC then pcall(function() wCC:Destroy() end) wCC=nil end
+if wBl then pcall(function() wBl:Destroy() end) wBl=nil end
+if wSnd then pcall(function() wSnd:Destroy() end) wSnd=nil end
+if not S.wastedEnabled then return end
+wGui=Instance.new("ScreenGui")
+wGui.Name="WastedGui" wGui.IgnoreGuiInset=true wGui.ResetOnSpawn=false wGui.Parent=Player:WaitForChild("PlayerGui")
+wBFk=Instance.new("Frame")
+wBFk.Size=UDim2.new(1,0,1,0) wBFk.BackgroundColor3=BLACK wBFk.BackgroundTransparency=1 wBFk.BorderSizePixel=0 wBFk.ZIndex=1 wBFk.Parent=wGui
+wBF=Instance.new("Frame")
+wBF.Size=UDim2.new(1,0,0.18,0) wBF.Position=UDim2.new(0,0,0.41,0) wBF.BackgroundColor3=BLACK wBF.BackgroundTransparency=1 wBF.BorderSizePixel=0 wBF.ZIndex=2 wBF.Parent=wGui
+wLbl=Instance.new("TextLabel")
+wLbl.Size=UDim2.new(0.6,0,1,0) wLbl.Position=UDim2.new(0.2,0,0,0) wLbl.BackgroundTransparency=1 wLbl.Text="WASTED" wLbl.TextColor3=Color3.fromRGB(180,0,0) wLbl.TextStrokeTransparency=0.3 wLbl.TextStrokeColor3=BLACK wLbl.Font=Enum.Font.GothamBold wLbl.TextScaled=true wLbl.TextTransparency=1 wLbl.ZIndex=3 wLbl.Parent=wBF
+wCC=Instance.new("ColorCorrectionEffect")
+wCC.Name="WastedEffect" wCC.Enabled=false wCC.Parent=Lighting
+wBl=Instance.new("BlurEffect")
+wBl.Name="WastedBlur" wBl.Size=0 wBl.Enabled=false wBl.Parent=Lighting
+wSnd=Instance.new("Sound")
+wSnd.Name="WastedSound" wSnd.SoundId="rbxassetid://5256796890" wSnd.Volume=1.5 wSnd.PlaybackSpeed=1 wSnd.Parent=SoundService
+local function suC(c)
+local h=c:WaitForChild("Humanoid",5)
+if not h then return end
+h.Died:Connect(function() if S.wastedEnabled then pWE(c) end end)
+end
+if Player.Character then suC(Player.Character) end
+Player.CharacterAdded:Connect(function(c) task.wait(1) if S.wastedEnabled then suC(c) end end)
+end
+local function stopR()
+if rSnd then pcall(function() rSnd:Stop() end) pcall(function() rSnd:Destroy() end) rSnd=nil end
+rPlay=false
+end
+local function playRI(i)
+if #RS==0 then return end
+if i<1 then i=#RS end
+if i>#RS then i=1 end
+rci=i
+stopR()
+local sg=RS[i]
+rSnd=Instance.new("Sound")
+rSnd.Name="MonvisualRadioSound"
+rSnd.SoundId="rbxassetid://"..tostring(sg.id)
+rSnd.Volume=rv
+rSnd.Looped=false
+rSnd.Parent=SoundService
+rSnd:Play()
+rPlay=true
+rSnd.Ended:Connect(function()
+if not rPlay then return end
+if rl then playRI(rci)
+elseif rci<#RS then playRI(rci+1)
+else stopR() end
+end)
+end
+local function togR()
+if rPlay then stopR() else if #RS>0 then playRI(rci>0 and rci or 1) end end
+end
+task.spawn(function()
+if not Player.Character then Player.CharacterAdded:Wait() end
+task.wait(0.5)
+aP() aT() aHl() aRTX() aGl() aAu() aDN() aDE() aHt() aW()
 end)
 Player.CharacterAdded:Connect(function()
-    task.wait(1)
-    ApplyParticles() ApplyHeadless() ApplyAura() ApplyHat()
+task.wait(1)
+aP() aHl() aAu() aHt()
 end)
-
 RunService.RenderStepped:Connect(function()
-    if settings.stretchEnabled then
-        Camera.CFrame = Camera.CFrame * stretchCFrame
-    end
+if S.stretchEnabled then Camera.CFrame=Camera.CFrame*scF end
 end)
--- ================== GUI ==================
-local ScreenGui = Instance.new("ScreenGui")
-ScreenGui.Name = "Monvisual"
-ScreenGui.ResetOnSpawn = false
-pcall(function() ScreenGui.Parent = game.CoreGui end)
-_G.Monvisual_ScreenGui = ScreenGui
-
-local uiBlur = Instance.new("BlurEffect")
-uiBlur.Name = "MonvisualUIBlur"
-uiBlur.Size = 0
-uiBlur.Parent = Lighting
-
-local Main = Instance.new("Frame", ScreenGui)
-Main.Size = UDim2.new(0, 700, 0, 420)
-Main.Position = UDim2.new(0.5, -350, 0.5, -210)
-Main.BackgroundColor3 = getThemeColor()
-Main.BackgroundTransparency = getTransparency()
-Main.BorderSizePixel = 0
-Main.Active = false
-Main.Visible = false
-Main.AnchorPoint = Vector2.new(0.5, 0.5)
-local mainCorner = Instance.new("UICorner", Main)
-mainCorner.CornerRadius = UDim.new(0, 18)
-
-local function toggleMenu(show)
-    if show then
-        Main.Visible = true
-        Main.AnchorPoint = Vector2.new(0.5, 0.5)
-        Main.Size = UDim2.new(0, 700, 0, 420)
-        Main.Position = UDim2.new(-0.5, 0, 0.5, 0)
-        Main.Rotation = -15
-        Main.BackgroundTransparency = 1
-        TweenService:Create(Main, TweenInfo.new(0.45, Enum.EasingStyle.Back, Enum.EasingDirection.Out), {
-            Position = UDim2.new(0.5, 0, 0.5, 0),
-            Rotation = 0,
-            BackgroundTransparency = getTransparency()
-        }):Play()
-        TweenService:Create(uiBlur, TweenInfo.new(0.35), {Size = 20}):Play()
-    else
-        local tween = TweenService:Create(Main, TweenInfo.new(0.35, Enum.EasingStyle.Back, Enum.EasingDirection.In), {
-            Position = UDim2.new(1.5, 0, 0.5, 0),
-            Rotation = 15,
-            BackgroundTransparency = 1
-        })
-        tween:Play()
-        TweenService:Create(uiBlur, TweenInfo.new(0.3), {Size = 0}):Play()
-        tween.Completed:Connect(function()
-            Main.Visible = false
-            Main.Rotation = 0
-        end)
-    end
+-- КОНЕЦ ЧАСТИ 1 — далее ЧАСТЬ 2
+-- ПРОДОЛЖЕНИЕ — ЧАСТЬ 2
+local SG=Instance.new("ScreenGui")
+SG.Name="Monvisual"
+SG.ResetOnSpawn=false
+pcall(function() SG.Parent=game.CoreGui end)
+_G.Monvisual_ScreenGui=SG
+local uB=Instance.new("BlurEffect")
+uB.Name="MonvisualUIBlur"
+uB.Size=0
+uB.Parent=Lighting
+local M=Instance.new("Frame",SG)
+M.Size=UDim2.new(0,700,0,420)
+M.Position=UDim2.new(0.5,-350,0.5,-210)
+M.BackgroundColor3=gc()
+M.BackgroundTransparency=gt()
+M.BorderSizePixel=0
+M.Active=false
+M.Visible=false
+M.AnchorPoint=Vector2.new(0.5,0.5)
+local mC=Instance.new("UICorner",M)
+mC.CornerRadius=UDim.new(0,18)
+local function tM(sh)
+if sh then
+M.Visible=true
+M.AnchorPoint=Vector2.new(0.5,0.5)
+M.Size=UDim2.new(0,700,0,420)
+M.Position=UDim2.new(-0.5,0,0.5,0)
+M.Rotation=-15
+M.BackgroundTransparency=1
+TweenService:Create(M,TweenInfo.new(0.45,Enum.EasingStyle.Back,Enum.EasingDirection.Out),{Position=UDim2.new(0.5,0,0.5,0),Rotation=0,BackgroundTransparency=gt()}):Play()
+TweenService:Create(uB,TweenInfo.new(0.35),{Size=20}):Play()
+else
+local tw=TweenService:Create(M,TweenInfo.new(0.35,Enum.EasingStyle.Back,Enum.EasingDirection.In),{Position=UDim2.new(1.5,0,0.5,0),Rotation=15,BackgroundTransparency=1})
+tw:Play()
+TweenService:Create(uB,TweenInfo.new(0.3),{Size=0}):Play()
+tw.Completed:Connect(function() M.Visible=false M.Rotation=0 end)
 end
-
-local Stroke = Instance.new("UIStroke", Main)
-Stroke.Color = getAccentColor()
-Stroke.Thickness = 2
-
-local SideBar = Instance.new("Frame", Main)
-SideBar.Size = UDim2.new(0, 200, 1, 0)
-SideBar.BackgroundColor3 = getThemeColor()
-SideBar.BackgroundTransparency = getTransparency()
-SideBar.BorderSizePixel = 0
-local sideCorner = Instance.new("UICorner", SideBar)
-sideCorner.CornerRadius = UDim.new(0, 18)
-
-local Logo = Instance.new("TextLabel", SideBar)
-Logo.Size = UDim2.new(1, 0, 0, 70)
-Logo.BackgroundTransparency = 1
-Logo.Text = "MONVISUAL\n" .. Player.Name
-Logo.TextColor3 = WHITE
-Logo.TextSize = 18
-Logo.Font = Enum.Font.GothamBold
-
-local categories = {"Комбат", "Визуал", "Шейдеры", "Анимации", "Радио", "Темы"}
-local catButtons = {}
-local catY = 130
-for _, name in ipairs(categories) do
-    local btn = Instance.new("TextButton", SideBar)
-    btn.Size = UDim2.new(0.85, 0, 0, 30)
-    btn.Position = UDim2.new(0.075, 0, 0, catY)
-    btn.BackgroundColor3 = getThemeColor()
-    btn.BackgroundTransparency = 0.85
-    btn.TextColor3 = WHITE
-    btn.Text = "◆ " .. name
-    btn.TextSize = 13
-    btn.Font = Enum.Font.Gotham
-    btn.BorderSizePixel = 0
-    btn.TextXAlignment = Enum.TextXAlignment.Left
-    local c = Instance.new("UICorner", btn)
-    c.CornerRadius = UDim.new(0, 8)
-    table.insert(catButtons, btn)
-    catY = catY + 34
 end
-
-local Content = Instance.new("Frame", Main)
-Content.Size = UDim2.new(1, -210, 1, -20)
-Content.Position = UDim2.new(0, 210, 0, 10)
-Content.BackgroundTransparency = 1
-Content.ClipsDescendants = true
-
-local SectionTitle = Instance.new("TextLabel", Content)
-SectionTitle.Size = UDim2.new(1, -30, 0, 30)
-SectionTitle.Position = UDim2.new(0, 0, 0, 0)
-SectionTitle.BackgroundTransparency = 1
-SectionTitle.Text = "Комбат"
-SectionTitle.TextColor3 = WHITE
-SectionTitle.TextSize = 18
-SectionTitle.Font = Enum.Font.GothamBold
-SectionTitle.TextXAlignment = Enum.TextXAlignment.Left
-
-local CloseMenu = Instance.new("TextButton", Main)
-CloseMenu.Size = UDim2.new(0, 26, 0, 26)
-CloseMenu.Position = UDim2.new(1, -32, 0, 6)
-CloseMenu.BackgroundColor3 = Color3.fromRGB(180, 50, 50)
-CloseMenu.Text = "X"
-CloseMenu.TextColor3 = WHITE
-CloseMenu.TextSize = 14
-CloseMenu.Font = Enum.Font.GothamBold
-CloseMenu.BorderSizePixel = 0
-local cmCorner = Instance.new("UICorner", CloseMenu)
-cmCorner.CornerRadius = UDim.new(0, 6)
-CloseMenu.MouseButton1Click:Connect(function()
-    toggleMenu(false)
-    if _G.Monvisual_AnimateSpeaker then _G.Monvisual_AnimateSpeaker(false) end
-end)
-
--- ===== КАРТОЧКИ =====
-local CardContainer = Instance.new("ScrollingFrame", Content)
-CardContainer.Size = UDim2.new(1, -15, 1, -50)
-CardContainer.Position = UDim2.new(0, 0, 0, 40)
-CardContainer.BackgroundTransparency = 1
-CardContainer.BorderSizePixel = 0
-CardContainer.ScrollBarThickness = 4
-CardContainer.ScrollBarImageColor3 = getAccentColor()
-CardContainer.ScrollBarImageTransparency = 0.5
-CardContainer.CanvasSize = UDim2.new(0, 0, 0, 0)
-CardContainer.Visible = true
-
-local cardPadding = Instance.new("UIPadding", CardContainer)
-cardPadding.PaddingLeft = UDim.new(0, 5)
-cardPadding.PaddingRight = UDim.new(0, 5)
-cardPadding.PaddingTop = UDim.new(0, 5)
-cardPadding.PaddingBottom = UDim.new(0, 5)
-
-local cardLayout = Instance.new("UIGridLayout", CardContainer)
-cardLayout.CellSize = UDim2.new(0.48, -4, 0, 55)
-cardLayout.CellPadding = UDim2.new(0.02, 0, 0, 8)
-
-CardContainer.ChildAdded:Connect(function()
-    task.wait()
-    CardContainer.CanvasSize = UDim2.new(0, 0, 0, cardLayout.AbsoluteContentSize.Y + 10)
-end)
-CardContainer.ChildRemoved:Connect(function()
-    task.wait()
-    CardContainer.CanvasSize = UDim2.new(0, 0, 0, cardLayout.AbsoluteContentSize.Y + 10)
-end)
-
--- ===== ANIM MAIN =====
-local AnimMain = Instance.new("Frame", Content)
-AnimMain.Size = UDim2.new(1, -15, 1, -50)
-AnimMain.Position = UDim2.new(0, 0, 0, 40)
-AnimMain.BackgroundTransparency = 1
-AnimMain.Visible = false
-AnimMain.ClipsDescendants = true
-
-local topResetBtn = Instance.new("TextButton", AnimMain)
-topResetBtn.Size = UDim2.new(1, 0, 0, 28)
-topResetBtn.Position = UDim2.new(0, 0, 0, 0)
-topResetBtn.BackgroundTransparency = 1
-topResetBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-topResetBtn.Text = "СБРОСИТЬ АНИМАЦИИ"
-topResetBtn.TextColor3 = WHITE
-topResetBtn.TextSize = 12
-topResetBtn.Font = Enum.Font.GothamBold
-topResetBtn.BorderSizePixel = 0
-topResetBtn.AutoButtonColor = false
-topResetBtn.TextStrokeTransparency = 0.5
-topResetBtn.TextStrokeColor3 = Color3.fromRGB(180, 50, 50)
-local trbStroke = Instance.new("UIStroke", topResetBtn)
-trbStroke.Color = Color3.fromRGB(180, 50, 50)
-trbStroke.Thickness = 1
-topResetBtn.MouseButton1Click:Connect(function()
-    ResetAnimations()
-    topResetBtn.Text = "СБРОШЕНО!"
-    task.wait(1)
-    topResetBtn.Text = "СБРОСИТЬ АНИМАЦИИ"
-end)
-
-local AnimScroll = Instance.new("ScrollingFrame", AnimMain)
-AnimScroll.Size = UDim2.new(1, -5, 1, -75)
-AnimScroll.Position = UDim2.new(0, 0, 0, 32)
-AnimScroll.BackgroundTransparency = 1
-AnimScroll.BorderSizePixel = 0
-AnimScroll.ScrollBarThickness = 4
-AnimScroll.ScrollBarImageColor3 = getAccentColor()
-AnimScroll.ScrollBarImageTransparency = 0.5
-AnimScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-
-local animGrid = Instance.new("UIGridLayout", AnimScroll)
-animGrid.CellSize = UDim2.new(0.48, -4, 0, 70)
-animGrid.CellPadding = UDim2.new(0.02, 0, 0, 8)
-animGrid.SortOrder = Enum.SortOrder.LayoutOrder
-
-AnimScroll.ChildAdded:Connect(function()
-    task.wait()
-    AnimScroll.CanvasSize = UDim2.new(0, 0, 0, animGrid.AbsoluteContentSize.Y + 10)
-end)
-AnimScroll.ChildRemoved:Connect(function()
-    task.wait()
-    AnimScroll.CanvasSize = UDim2.new(0, 0, 0, animGrid.AbsoluteContentSize.Y + 10)
-end)
-
-local bottomRow = Instance.new("Frame", AnimMain)
-bottomRow.Size = UDim2.new(1, 0, 0, 32)
-bottomRow.Position = UDim2.new(0, 0, 1, -34)
-bottomRow.BackgroundTransparency = 1
-
-local bottomLayout = Instance.new("UIListLayout", bottomRow)
-bottomLayout.FillDirection = Enum.FillDirection.Horizontal
-bottomLayout.Padding = UDim.new(0, 4)
-bottomLayout.SortOrder = Enum.SortOrder.LayoutOrder
-
-local function makeBottomBtn(text, color)
-    local btn = Instance.new("TextButton", bottomRow)
-    btn.Size = UDim2.new(0.49, -2, 1, 0)
-    btn.BackgroundTransparency = 1
-    btn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-    btn.Text = text
-    btn.TextColor3 = WHITE
-    btn.TextSize = 11
-    btn.Font = Enum.Font.GothamBold
-    btn.BorderSizePixel = 0
-    btn.AutoButtonColor = false
-    btn.TextStrokeTransparency = 0.5
-    btn.TextStrokeColor3 = color
-    local s = Instance.new("UIStroke", btn)
-    s.Color = color
-    s.Thickness = 1.2
-    s.Transparency = 0
-    return btn
+local Stk=Instance.new("UIStroke",M)
+Stk.Color=ga()
+Stk.Thickness=2
+local SB=Instance.new("Frame",M)
+SB.Size=UDim2.new(0,200,1,0)
+SB.BackgroundColor3=gc()
+SB.BackgroundTransparency=gt()
+SB.BorderSizePixel=0
+local sC=Instance.new("UICorner",SB)
+sC.CornerRadius=UDim.new(0,18)
+local Lg=Instance.new("TextLabel",SB)
+Lg.Size=UDim2.new(1,0,0,70)
+Lg.BackgroundTransparency=1
+Lg.Text="MONVISUAL\n"..Player.Name
+Lg.TextColor3=WHITE
+Lg.TextSize=18
+Lg.Font=Enum.Font.GothamBold
+local cat={"Комбат","Визуал","Косметика","Шейдеры","Анимации","Радио","Темы"}
+local cB={}
+local cY=130
+for _,n in ipairs(cat) do
+local b=Instance.new("TextButton",SB)
+b.Size=UDim2.new(0.85,0,0,30)
+b.Position=UDim2.new(0.075,0,0,cY)
+b.BackgroundColor3=gc()
+b.BackgroundTransparency=0.85
+b.TextColor3=WHITE
+b.Text="◆ "..n
+b.TextSize=13
+b.Font=Enum.Font.Gotham
+b.BorderSizePixel=0
+b.TextXAlignment=Enum.TextXAlignment.Left
+local cc=Instance.new("UICorner",b)
+cc.CornerRadius=UDim.new(0,8)
+table.insert(cB,b)
+cY=cY+34
 end
-
--- ===== КАРТОЧКА ПАКА =====
-local function MakeAnimCard(parent, name, pack)
-    local card = Instance.new("TextButton", parent)
-    card.BackgroundColor3 = getThemeColor()
-    card.BackgroundTransparency = getTransparency()
-    card.Text = ""
-    card.BorderSizePixel = 0
-    card.AutoButtonColor = false
-    local cc = Instance.new("UICorner", card)
-    cc.CornerRadius = UDim.new(0, 10)
-    local cStroke = Instance.new("UIStroke", card)
-    cStroke.Color = getAccentColor()
-    cStroke.Thickness = 1
-
-    local iconBg = Instance.new("Frame", card)
-    iconBg.Size = UDim2.new(0, 42, 0, 42)
-    iconBg.Position = UDim2.new(0, 6, 0.5, -21)
-    iconBg.BackgroundColor3 = getAccentColor()
-    iconBg.BackgroundTransparency = 0.7
-    iconBg.BorderSizePixel = 0
-    local ibc = Instance.new("UICorner", iconBg)
-    ibc.CornerRadius = UDim.new(1, 0)
-
-    local icon = Instance.new("TextLabel", iconBg)
-    icon.Size = UDim2.new(1, 0, 1, 0)
-    icon.BackgroundTransparency = 1
-    icon.Text = "▶"
-    icon.TextColor3 = WHITE
-    icon.Font = Enum.Font.GothamBold
-    icon.TextSize = 18
-
-    local label = Instance.new("TextLabel", card)
-    label.Size = UDim2.new(1, -60, 0, 18)
-    label.Position = UDim2.new(0, 54, 0, 12)
-    label.BackgroundTransparency = 1
-    label.Text = name
-    label.TextColor3 = WHITE
-    label.Font = Enum.Font.GothamBold
-    label.TextSize = 13
-    label.TextXAlignment = Enum.TextXAlignment.Left
-    label.TextTruncate = Enum.TextTruncate.AtEnd
-
-    local sub = Instance.new("TextLabel", card)
-    sub.Size = UDim2.new(1, -60, 0, 16)
-    sub.Position = UDim2.new(0, 54, 0, 32)
-    sub.BackgroundTransparency = 1
-    sub.Text = "animation pack"
-    sub.TextColor3 = Color3.fromRGB(160, 160, 180)
-    sub.Font = Enum.Font.Gotham
-    sub.TextSize = 10
-    sub.TextXAlignment = Enum.TextXAlignment.Left
-
-    local star = Instance.new("TextButton", card)
-    star.Size = UDim2.new(0, 26, 0, 26)
-    star.Position = UDim2.new(1, -30, 0, 6)
-    star.BackgroundTransparency = 1
-    star.Text = AnimFavorites[name] and "★" or "☆"
-    star.TextColor3 = AnimFavorites[name] and Color3.fromRGB(255, 200, 50) or Color3.fromRGB(140, 140, 150)
-    star.Font = Enum.Font.GothamBold
-    star.TextSize = 18
-
-    star.MouseButton1Click:Connect(function()
-        if AnimFavorites[name] then
-            AnimFavorites[name] = nil
-            star.Text = "☆"
-            star.TextColor3 = Color3.fromRGB(140, 140, 150)
-        else
-            AnimFavorites[name] = pack
-            star.Text = "★"
-            star.TextColor3 = Color3.fromRGB(255, 200, 50)
-        end
-        SaveFavorites()
-    end)
-
-    card.MouseButton1Click:Connect(function()
-        ApplyAnimPack(pack, name)
-        card.BackgroundColor3 = Color3.fromRGB(0, 150, 90)
-        task.wait(0.25)
-        card.BackgroundColor3 = getThemeColor()
-    end)
-
-    return card
-end
-
-local function rebuildPacks()
-    AnimScroll.Visible = false
-    for _, c in ipairs(AnimScroll:GetChildren()) do
-        if c:IsA("TextButton") then c:Destroy() end
-    end
-    for name, pack in pairs(Packs) do
-        MakeAnimCard(AnimScroll, name, pack)
-    end
-    task.wait(0.05)
-    AnimScroll.CanvasSize = UDim2.new(0, 0, 0, animGrid.AbsoluteContentSize.Y + 10)
-    AnimScroll.Visible = true
-end
-
--- ===== ИЗБРАННОЕ =====
-local FavMain = Instance.new("Frame", Content)
-FavMain.Size = UDim2.new(1, -15, 1, -50)
-FavMain.Position = UDim2.new(0, 0, 0, 40)
-FavMain.BackgroundTransparency = 1
-FavMain.Visible = false
-FavMain.ClipsDescendants = true
-
-local FavBackBtn = Instance.new("TextButton", FavMain)
-FavBackBtn.Size = UDim2.new(0, 90, 0, 28)
-FavBackBtn.Position = UDim2.new(0, 0, 0, 0)
-FavBackBtn.BackgroundTransparency = 1
-FavBackBtn.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-FavBackBtn.Text = "← Назад"
-FavBackBtn.TextColor3 = WHITE
-FavBackBtn.TextSize = 12
-FavBackBtn.Font = Enum.Font.GothamBold
-FavBackBtn.BorderSizePixel = 0
-FavBackBtn.AutoButtonColor = false
-FavBackBtn.TextStrokeTransparency = 0.5
-FavBackBtn.TextStrokeColor3 = getAccentColor()
-local fbbStroke = Instance.new("UIStroke", FavBackBtn)
-fbbStroke.Color = getAccentColor()
-fbbStroke.Thickness = 1
-
-local FavTitleLbl = Instance.new("TextLabel", FavMain)
-FavTitleLbl.Size = UDim2.new(1, -100, 0, 28)
-FavTitleLbl.Position = UDim2.new(0, 95, 0, 0)
-FavTitleLbl.BackgroundTransparency = 1
-FavTitleLbl.Text = "ИЗБРАННОЕ"
-FavTitleLbl.TextColor3 = WHITE
-FavTitleLbl.TextSize = 14
-FavTitleLbl.Font = Enum.Font.GothamBold
-FavTitleLbl.TextXAlignment = Enum.TextXAlignment.Left
-
-local FavScroll = Instance.new("ScrollingFrame", FavMain)
-FavScroll.Size = UDim2.new(1, -5, 1, -32)
-FavScroll.Position = UDim2.new(0, 0, 0, 32)
-FavScroll.BackgroundTransparency = 1
-FavScroll.BorderSizePixel = 0
-FavScroll.ScrollBarThickness = 4
-FavScroll.ScrollBarImageColor3 = getAccentColor()
-FavScroll.ScrollBarImageTransparency = 0.5
-FavScroll.CanvasSize = UDim2.new(0, 0, 0, 0)
-
-local favGrid = Instance.new("UIGridLayout", FavScroll)
-favGrid.CellSize = UDim2.new(0.48, -4, 0, 70)
-favGrid.CellPadding = UDim2.new(0.02, 0, 0, 8)
-
-FavScroll.ChildAdded:Connect(function()
-    task.wait()
-    FavScroll.CanvasSize = UDim2.new(0, 0, 0, favGrid.AbsoluteContentSize.Y + 10)
+local Cn=Instance.new("Frame",M)
+Cn.Size=UDim2.new(1,-210,1,-20)
+Cn.Position=UDim2.new(0,210,0,10)
+Cn.BackgroundTransparency=1
+Cn.ClipsDescendants=true
+local ST=Instance.new("TextLabel",Cn)
+ST.Size=UDim2.new(1,-30,0,30)
+ST.Position=UDim2.new(0,0,0,0)
+ST.BackgroundTransparency=1
+ST.Text="Комбат"
+ST.TextColor3=WHITE
+ST.TextSize=18
+ST.Font=Enum.Font.GothamBold
+ST.TextXAlignment=Enum.TextXAlignment.Left
+local CM=Instance.new("TextButton",M)
+CM.Size=UDim2.new(0,26,0,26)
+CM.Position=UDim2.new(1,-32,0,6)
+CM.BackgroundColor3=Color3.fromRGB(180,50,50)
+CM.Text="X"
+CM.TextColor3=WHITE
+CM.TextSize=14
+CM.Font=Enum.Font.GothamBold
+CM.BorderSizePixel=0
+local cmC=Instance.new("UICorner",CM)
+cmC.CornerRadius=UDim.new(0,6)
+CM.MouseButton1Click:Connect(function()
+tM(false)
+if _G.Monvisual_AnimateSpeaker then _G.Monvisual_AnimateSpeaker(false) end
 end)
-FavScroll.ChildRemoved:Connect(function()
-    task.wait()
-    FavScroll.CanvasSize = UDim2.new(0, 0, 0, favGrid.AbsoluteContentSize.Y + 10)
+local CCn=Instance.new("ScrollingFrame",Cn)
+CCn.Size=UDim2.new(1,-15,1,-50)
+CCn.Position=UDim2.new(0,0,0,40)
+CCn.BackgroundTransparency=1
+CCn.BorderSizePixel=0
+CCn.ScrollBarThickness=4
+CCn.ScrollBarImageColor3=ga()
+CCn.ScrollBarImageTransparency=0.5
+CCn.CanvasSize=UDim2.new(0,0,0,0)
+CCn.Visible=true
+local cP=Instance.new("UIPadding",CCn)
+cP.PaddingLeft=UDim.new(0,5)
+cP.PaddingRight=UDim.new(0,5)
+cP.PaddingTop=UDim.new(0,5)
+cP.PaddingBottom=UDim.new(0,5)
+local cL=Instance.new("UIGridLayout",CCn)
+cL.CellSize=UDim2.new(0.48,-4,0,55)
+cL.CellPadding=UDim2.new(0.02,0,0,8)
+CCn.ChildAdded:Connect(function() task.wait() CCn.CanvasSize=UDim2.new(0,0,0,cL.AbsoluteContentSize.Y+10) end)
+CCn.ChildRemoved:Connect(function() task.wait() CCn.CanvasSize=UDim2.new(0,0,0,cL.AbsoluteContentSize.Y+10) end)
+local AM=Instance.new("Frame",Cn)
+AM.Size=UDim2.new(1,-15,1,-50)
+AM.Position=UDim2.new(0,0,0,40)
+AM.BackgroundTransparency=1
+AM.Visible=false
+AM.ClipsDescendants=true
+local tRB=Instance.new("TextButton",AM)
+tRB.Size=UDim2.new(1,0,0,28)
+tRB.Position=UDim2.new(0,0,0,0)
+tRB.BackgroundTransparency=1
+tRB.BackgroundColor3=Color3.fromRGB(0,0,0)
+tRB.Text="СБРОСИТЬ АНИМАЦИИ"
+tRB.TextColor3=WHITE
+tRB.TextSize=12
+tRB.Font=Enum.Font.GothamBold
+tRB.BorderSizePixel=0
+tRB.AutoButtonColor=false
+tRB.TextStrokeTransparency=0.5
+tRB.TextStrokeColor3=Color3.fromRGB(180,50,50)
+local trS=Instance.new("UIStroke",tRB)
+trS.Color=Color3.fromRGB(180,50,50)
+trS.Thickness=1
+tRB.MouseButton1Click:Connect(function()
+ResetAnimations()
+tRB.Text="СБРОШЕНО!"
+task.wait(1)
+tRB.Text="СБРОСИТЬ АНИМАЦИИ"
 end)
-
-local function rebuildFavorites()
-    FavScroll.Visible = false
-    for _, c in ipairs(FavScroll:GetChildren()) do
-        if c:IsA("TextButton") or c:IsA("TextLabel") then c:Destroy() end
-    end
-    local hasAny = false
-    for name, pack in pairs(AnimFavorites) do
-        hasAny = true
-        MakeAnimCard(FavScroll, name, pack)
-    end
-    if not hasAny then
-        local lbl = Instance.new("TextLabel", FavScroll)
-        lbl.Size = UDim2.new(1, 0, 0, 40)
-        lbl.BackgroundTransparency = 1
-        lbl.Text = "Нет избранных паков"
-        lbl.TextColor3 = Color3.fromRGB(180, 180, 200)
-        lbl.TextSize = 13
-        lbl.Font = Enum.Font.Gotham
-    end
-    task.wait(0.05)
-    FavScroll.CanvasSize = UDim2.new(0, 0, 0, favGrid.AbsoluteContentSize.Y + 10)
-    FavScroll.Visible = true
+local AS=Instance.new("ScrollingFrame",AM)
+AS.Size=UDim2.new(1,-5,1,-75)
+AS.Position=UDim2.new(0,0,0,32)
+AS.BackgroundTransparency=1
+AS.BorderSizePixel=0
+AS.ScrollBarThickness=4
+AS.ScrollBarImageColor3=ga()
+AS.ScrollBarImageTransparency=0.5
+AS.CanvasSize=UDim2.new(0,0,0,0)
+local aG=Instance.new("UIGridLayout",AS)
+aG.CellSize=UDim2.new(0.48,-4,0,70)
+aG.CellPadding=UDim2.new(0.02,0,0,8)
+aG.SortOrder=Enum.SortOrder.LayoutOrder
+AS.ChildAdded:Connect(function() task.wait() AS.CanvasSize=UDim2.new(0,0,0,aG.AbsoluteContentSize.Y+10) end)
+AS.ChildRemoved:Connect(function() task.wait() AS.CanvasSize=UDim2.new(0,0,0,aG.AbsoluteContentSize.Y+10) end)
+local bR=Instance.new("Frame",AM)
+bR.Size=UDim2.new(1,0,0,32)
+bR.Position=UDim2.new(0,0,1,-34)
+bR.BackgroundTransparency=1
+local bL=Instance.new("UIListLayout",bR)
+bL.FillDirection=Enum.FillDirection.Horizontal
+bL.Padding=UDim.new(0,4)
+bL.SortOrder=Enum.SortOrder.LayoutOrder
+local function mkBB(tx,col)
+local b=Instance.new("TextButton",bR)
+b.Size=UDim2.new(0.33,-4,1,0)
+b.BackgroundTransparency=1
+b.BackgroundColor3=Color3.fromRGB(0,0,0)
+b.Text=tx
+b.TextColor3=WHITE
+b.TextSize=11
+b.Font=Enum.Font.GothamBold
+b.BorderSizePixel=0
+b.AutoButtonColor=false
+b.TextStrokeTransparency=0.5
+b.TextStrokeColor3=col
+local s=Instance.new("UIStroke",b)
+s.Color=col
+s.Thickness=1.2
+return b
 end
-
--- ===== ПЕРЕКЛЮЧАТЕЛИ =====
-local animsBtn = makeBottomBtn("Анимации", getAccentColor())
-local favsBtn = makeBottomBtn("Избранное", getAccentColor())
-
-local function hideAll()
-    CardContainer.Visible = false
-    AnimMain.Visible = false
-    FavMain.Visible = false
-    AnimScroll.Visible = false
-    FavScroll.Visible = false
-    for _, c in ipairs(AnimScroll:GetChildren()) do
-        if c:IsA("TextButton") then c:Destroy() end
-    end
-    for _, c in ipairs(FavScroll:GetChildren()) do
-        if c:IsA("TextButton") or c:IsA("TextLabel") then c:Destroy() end
-    end
-end
-
-animsBtn.MouseButton1Click:Connect(function()
-    hideAll()
-    rebuildPacks()
-    task.wait(0.05)
-    AnimMain.Visible = true
+local function mkAC(par,n,pk)
+local cd=Instance.new("TextButton",par)
+cd.BackgroundColor3=gc()
+cd.BackgroundTransparency=gt()
+cd.Text=""
+cd.BorderSizePixel=0
+cd.AutoButtonColor=false
+local c1=Instance.new("UICorner",cd)
+c1.CornerRadius=UDim.new(0,10)
+local cs=Instance.new("UIStroke",cd)
+cs.Color=ga()
+cs.Thickness=1
+local iB=Instance.new("Frame",cd)
+iB.Size=UDim2.new(0,42,0,42)
+iB.Position=UDim2.new(0,6,0.5,-21)
+iB.BackgroundColor3=ga()
+iB.BackgroundTransparency=0.7
+iB.BorderSizePixel=0
+local ibC=Instance.new("UICorner",iB)
+ibC.CornerRadius=UDim.new(1,0)
+local ic=Instance.new("TextLabel",iB)
+ic.Size=UDim2.new(1,0,1,0)
+ic.BackgroundTransparency=1
+ic.Text="▶"
+ic.TextColor3=WHITE
+ic.Font=Enum.Font.GothamBold
+ic.TextSize=18
+local lb=Instance.new("TextLabel",cd)
+lb.Size=UDim2.new(1,-100,0,18)
+lb.Position=UDim2.new(0,54,0,12)
+lb.BackgroundTransparency=1
+lb.Text=n
+lb.TextColor3=WHITE
+lb.Font=Enum.Font.GothamBold
+lb.TextSize=13
+lb.TextXAlignment=Enum.TextXAlignment.Left
+lb.TextTruncate=Enum.TextTruncate.AtEnd
+local sb=Instance.new("TextLabel",cd)
+sb.Size=UDim2.new(1,-100,0,16)
+sb.Position=UDim2.new(0,54,0,32)
+sb.BackgroundTransparency=1
+sb.Text="animation pack"
+sb.TextColor3=Color3.fromRGB(160,160,180)
+sb.Font=Enum.Font.Gotham
+sb.TextSize=10
+sb.TextXAlignment=Enum.TextXAlignment.Left
+local sr=Instance.new("TextButton",cd)
+sr.Size=UDim2.new(0,26,0,26)
+sr.Position=UDim2.new(1,-30,0,6)
+sr.BackgroundTransparency=1
+sr.Text=AFav[n] and "★" or "☆"
+sr.TextColor3=AFav[n] and Color3.fromRGB(255,200,50) or Color3.fromRGB(140,140,150)
+sr.Font=Enum.Font.GothamBold
+sr.TextSize=18
+sr.MouseButton1Click:Connect(function()
+if AFav[n] then AFav[n]=nil sr.Text="☆" sr.TextColor3=Color3.fromRGB(140,140,150)
+else AFav[n]=pk sr.Text="★" sr.TextColor3=Color3.fromRGB(255,200,50) end
+sfav()
 end)
-
-favsBtn.MouseButton1Click:Connect(function()
-    hideAll()
-    rebuildFavorites()
-    task.wait(0.05)
-    FavMain.Visible = true
+cd.MouseButton1Click:Connect(function()
+ApplyAnimPack(pk,n)
+cd.BackgroundColor3=Color3.fromRGB(0,150,90)
+task.wait(0.25)
+cd.BackgroundColor3=gc()
 end)
-
-FavBackBtn.MouseButton1Click:Connect(function()
-    hideAll()
-    rebuildPacks()
-    task.wait(0.05)
-    AnimMain.Visible = true
+return cd
+end
+local function rBP()
+AS.Visible=false
+for _,c in ipairs(AS:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
+for n,pk in pairs(P) do
+local cd=mkAC(AS,n,pk)
+if MP[n] then
+local db=Instance.new("TextButton",cd)
+db.Size=UDim2.new(0,22,0,22)
+db.Position=UDim2.new(1,-58,0,6)
+db.BackgroundColor3=Color3.fromRGB(180,50,50)
+db.Text="X"
+db.TextColor3=WHITE
+db.TextSize=12
+db.Font=Enum.Font.GothamBold
+db.BorderSizePixel=0
+db.AutoButtonColor=false
+local dC2=Instance.new("UICorner",db)
+dC2.CornerRadius=UDim.new(0,5)
+db.MouseButton1Click:Connect(function()
+MP[n]=nil P[n]=nil smix()
+if CAP==pk then ResetAnimations() end
+rBP()
 end)
-
--- ===== UPDATE THEME =====
-local function updateTheme()
-    local accent = getAccentColor()
-    local trans = getTransparency()
-
-    Main.BackgroundColor3 = getThemeColor()
-    if Main.Visible then Main.BackgroundTransparency = trans end
-    SideBar.BackgroundColor3 = getThemeColor()
-    SideBar.BackgroundTransparency = trans
-    Stroke.Color = accent
-    CardContainer.ScrollBarImageColor3 = accent
-    AnimScroll.ScrollBarImageColor3 = accent
-    FavScroll.ScrollBarImageColor3 = accent
-
-    for _, btn in ipairs(catButtons) do
-        btn.BackgroundTransparency = trans
-    end
-
-    if OpenBtn then
-        OpenBtn.BackgroundTransparency = 0
-        OpenBtn.BackgroundColor3 = BLACK
-    end
-
-    if auraLight and settings.auraColorUseTheme then
-        auraLight.Color = accent
-    end
-
-    for _, card in ipairs(CardContainer:GetChildren()) do
-        if card:IsA("Frame") then
-            card.BackgroundTransparency = trans
-            for _, child in ipairs(card:GetChildren()) do
-                if child:IsA("UIStroke") then child.Color = accent
-                elseif child:IsA("TextButton") and child.Text == "S" then child.BackgroundColor3 = accent
-                elseif child:IsA("TextButton") and (child.Text == "OFF" or child.Text == "ON") then
-                    if child.Text == "ON" then
-                        child.BackgroundColor3 = BLACK
-                    else
-                        child.BackgroundColor3 = WHITE
-                    end
-                end
-            end
-        end
-    end
 end
-
--- ===== SETTINGS =====
-local function openSettings(title, sliders)
-    local existing = ScreenGui:FindFirstChild("Settings_" .. title)
-    if existing then existing:Destroy() return end
-    local count = #sliders
-    local h = 60 + count * 55
-    local SF = Instance.new("Frame", ScreenGui)
-    SF.Name = "Settings_" .. title
-    SF.Size = UDim2.new(0, 320, 0, h)
-    SF.Position = UDim2.new(0.5, -160, 0.5, -h/2)
-    SF.BackgroundColor3 = getThemeColor()
-    SF.BackgroundTransparency = getTransparency()
-    SF.BorderSizePixel = 0
-    SF.Active = true
-    local sfc = Instance.new("UICorner", SF)
-    sfc.CornerRadius = UDim.new(0, 12)
-
-    local t = Instance.new("TextLabel", SF)
-    t.Size = UDim2.new(1, 0, 0, 30)
-    t.Position = UDim2.new(0, 0, 0, 10)
-    t.BackgroundTransparency = 1
-    t.Text = title
-    t.TextColor3 = WHITE
-    t.TextSize = 15
-    t.Font = Enum.Font.GothamBold
-
-    local closeB = Instance.new("TextButton", SF)
-    closeB.Size = UDim2.new(0, 30, 0, 30)
-    closeB.Position = UDim2.new(1, -35, 0, 5)
-    closeB.BackgroundTransparency = 1
-    closeB.Text = "X"
-    closeB.TextColor3 = WHITE
-    closeB.TextSize = 18
-    closeB.Font = Enum.Font.GothamBold
-    closeB.MouseButton1Click:Connect(function() SF:Destroy() end)
-
-    for i, s in ipairs(sliders) do
-        local yB = 45 + (i-1) * 55
-        local lbl = Instance.new("TextLabel", SF)
-        lbl.Size = UDim2.new(0.9, 0, 0, 18)
-        lbl.Position = UDim2.new(0.05, 0, 0, yB)
-        lbl.BackgroundTransparency = 1
-        lbl.Text = s.name .. ": " .. string.format("%.2f", s.default)
-        lbl.TextColor3 = WHITE
-        lbl.TextSize = 12
-        lbl.Font = Enum.Font.Gotham
-        lbl.TextXAlignment = Enum.TextXAlignment.Left
-
-        local slider = Instance.new("TextButton", SF)
-        slider.Size = UDim2.new(0.9, 0, 0, 16)
-        slider.Position = UDim2.new(0.05, 0, 0, yB + 22)
-        slider.BackgroundColor3 = Color3.fromRGB(50, 40, 80)
-        slider.Text = ""
-        slider.BorderSizePixel = 0
-        slider.AutoButtonColor = false
-        local sc = Instance.new("UICorner", slider)
-        sc.CornerRadius = UDim.new(1, 0)
-
-        local fill = Instance.new("Frame", slider)
-        fill.Size = UDim2.new((s.default-s.min)/(s.max-s.min), 0, 1, 0)
-        fill.BackgroundColor3 = getAccentColor()
-        fill.BorderSizePixel = 0
-        local fc = Instance.new("UICorner", fill)
-        fc.CornerRadius = UDim.new(1, 0)
-
-        local knob = Instance.new("Frame", slider)
-        knob.Size = UDim2.new(0, 14, 1, 0)
-        knob.Position = UDim2.new((s.default-s.min)/(s.max-s.min), -7, 0, 0)
-        knob.BackgroundColor3 = WHITE
-        knob.BorderSizePixel = 0
-        local kc = Instance.new("UICorner", knob)
-        kc.CornerRadius = UDim.new(1, 0)
-
-        local dragging = false
-        local function updateFromInput(input)
-            local x = input.Position.X
-            local absX = slider.AbsolutePosition.X
-            local sizeX = slider.AbsoluteSize.X
-            if sizeX > 0 then
-                local pos = math.clamp((x - absX) / sizeX, 0, 1)
-                fill.Size = UDim2.new(pos, 0, 1, 0)
-                knob.Position = UDim2.new(pos, -7, 0, 0)
-                local val = s.min + pos * (s.max - s.min)
-                lbl.Text = s.name .. ": " .. string.format("%.2f", val)
-                s.callback(val)
-                SaveConfig()
-            end
-        end
-        slider.InputBegan:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = true
-                updateFromInput(input)
-            end
-        end)
-        UserInputService.InputEnded:Connect(function(input)
-            if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-                dragging = false
-            end
-        end)
-        UserInputService.InputChanged:Connect(function(input)
-            if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-                updateFromInput(input)
-            end
-        end)
-    end
 end
-
--- ===== CREATE CARDS =====
-local function createCards(list)
-    for _, child in ipairs(CardContainer:GetChildren()) do
-        if child:IsA("Frame") then child:Destroy() end
-    end
-    for i, f in ipairs(list) do
-        local card = Instance.new("Frame", CardContainer)
-        card.BackgroundColor3 = getThemeColor()
-        card.BackgroundTransparency = getTransparency()
-        card.BorderSizePixel = 0
-        local cc = Instance.new("UICorner", card)
-        cc.CornerRadius = UDim.new(0, 10)
-        local stroke = Instance.new("UIStroke", card)
-        stroke.Color = getAccentColor()
-        stroke.Thickness = 1
-
-        local title = Instance.new("TextLabel", card)
-        title.Size = UDim2.new(1, -70, 0, 18)
-        title.Position = UDim2.new(0, 8, 0, 5)
-        title.BackgroundTransparency = 1
-        title.Text = f.name
-        title.TextColor3 = WHITE
-        title.TextSize = 12
-        title.Font = Enum.Font.GothamBold
-        title.TextXAlignment = Enum.TextXAlignment.Left
-        title.TextTruncate = Enum.TextTruncate.AtEnd
-
-        local desc = Instance.new("TextLabel", card)
-        desc.Size = UDim2.new(1, -16, 0, 24)
-        desc.Position = UDim2.new(0, 8, 0, 26)
-        desc.BackgroundTransparency = 1
-        desc.Text = f.desc
-        desc.TextColor3 = WHITE
-        desc.TextSize = 10
-        desc.Font = Enum.Font.Gotham
-        desc.TextWrapped = true
-        desc.TextXAlignment = Enum.TextXAlignment.Left
-
-        if f.settings then
-            local setBtn = Instance.new("TextButton", card)
-            setBtn.Size = UDim2.new(0, 20, 0, 20)
-            setBtn.Position = UDim2.new(1, -50, 0, 5)
-            setBtn.BackgroundColor3 = getAccentColor()
-            setBtn.Text = "S"
-            setBtn.TextColor3 = WHITE
-            setBtn.TextSize = 12
-            setBtn.Font = Enum.Font.GothamBold
-            setBtn.BorderSizePixel = 0
-            local setCorner = Instance.new("UICorner", setBtn)
-            setCorner.CornerRadius = UDim.new(0, 5)
-            setBtn.MouseButton1Click:Connect(function() f.settings() end)
-        end
-
-        local toggle = Instance.new("TextButton", card)
-        toggle.Size = UDim2.new(0, 22, 0, 12)
-        toggle.Position = UDim2.new(1, -26, 0, 6)
-        toggle.BackgroundColor3 = WHITE
-        toggle.Text = "OFF"
-        toggle.TextColor3 = BLACK
-        toggle.TextSize = 8
-        toggle.Font = Enum.Font.GothamBold
-        toggle.BorderSizePixel = 0
-        toggle.AutoButtonColor = false
-        local tc = Instance.new("UICorner", toggle)
-        tc.CornerRadius = UDim.new(1, 0)
-
-        if f.getState and f.getState() then
-            toggle.BackgroundColor3 = BLACK
-            toggle.Text = "ON"
-            toggle.TextColor3 = WHITE
-        end
-
-        toggle.MouseButton1Click:Connect(function()
-            if f.getState then
-                local newState = not f.getState()
-                f.callback(newState)
-                if newState then
-                    toggle.BackgroundColor3 = BLACK
-                    toggle.Text = "ON"
-                    toggle.TextColor3 = WHITE
-                else
-                    toggle.BackgroundColor3 = WHITE
-                    toggle.Text = "OFF"
-                    toggle.TextColor3 = BLACK
-                end
-                SaveConfig()
-            end
-        end)
-    end
-    task.wait()
-    CardContainer.CanvasSize = UDim2.new(0, 0, 0, cardLayout.AbsoluteContentSize.Y + 10)
+task.wait(0.05)
+AS.CanvasSize=UDim2.new(0,0,0,aG.AbsoluteContentSize.Y+10)
+AS.Visible=true
 end
-
--- ===== COMBAT FUNCTIONS =====
-local chamsFunc = {name="Chams", desc="Подсветка игроков через стены.", getState=function() return settings.chamsEnabled end,
-    callback=function(on)
-        settings.chamsEnabled = on
-        ApplyChams()
-    end}
-
-local boxEspFunc = {name="Box ESP", desc="Боксы вокруг игроков.", getState=function() return settings.boxEspEnabled end,
-    callback=function(on)
-        settings.boxEspEnabled = on
-        ApplyBoxEsp()
-    end}
-
-local skeletonEspFunc = {name="Skeleton ESP", desc="Скелет игроков.", getState=function() return settings.skeletonEspEnabled end,
-    callback=function(on)
-        settings.skeletonEspEnabled = on
-        ApplySkeletonEsp()
-    end}
-
-local mm2ChamsFunc = {name="MM2 Chams", desc="Роли в MM2: убийца/шериф/невинный.", getState=function() return settings.mm2ChamsEnabled end,
-    callback=function(on) settings.mm2ChamsEnabled = on end}
-
--- ===== CARD FUNCTIONS =====
-local stretchFunc = {name="Растяг", desc="Растягивает экран.", getState=function() return settings.stretchEnabled end,
-    settings=function() openSettings("Растяг", {{name="Фактор", min=50, max=100, default=settings.STRETCH_FACTOR*100, callback=function(v)
-        settings.STRETCH_FACTOR=v/100
-        stretchCFrame=CFrame.new(0,0,0, 1,0,0, 0,settings.STRETCH_FACTOR,0, 0,0,1) end}}) end,
-    callback=function(on) settings.stretchEnabled=on end}
-
-local particlesFunc = {name="Партиклы", desc="Частицы при ходьбе.", getState=function() return settings.particlesEnabled end,
-    settings=function() openSettings("Партиклы", {
-        {name="Плотность", min=0.5, max=50, default=settings.particlesDensity, callback=function(v) settings.particlesDensity=v end}
-    }) end,
-    callback=function(on) settings.particlesEnabled=on ApplyParticles() end}
-
-local trailsFunc = {name="Movement Trails", desc="Шлейф за игроком.", getState=function() return settings.trailsEnabled end,
-    settings=function() openSettings("Trails", {{name="Прозрачность", min=0.1, max=1, default=settings.trailsTransparency, callback=function(v) settings.trailsTransparency=v end}}) end,
-    callback=function(on) settings.trailsEnabled=on ApplyTrails() end}
-
-local circleFunc = {name="Волна при прыжке", desc="Эффект капли при прыжке.", getState=function() return settings.landingCircleEnabled end,
-    callback=function(on) settings.landingCircleEnabled=on end}
-
-local dayNightFunc = {name="Ночь / День", desc="Переключить время суток.", getState=function() return settings.dayNightEnabled end,
-    settings=function() openSettings("Ночь / День", {{name="Время", min=0, max=24, default=settings.dayNightTime, callback=function(v) settings.dayNightTime=v ApplyDayNight() end}}) end,
-    callback=function(on) settings.dayNightEnabled=on ApplyDayNight() end}
-
-local deathEffectFunc = {name="Death Effect", desc="Туман и неоновый столб при смерти других.", getState=function() return settings.deathEffectEnabled end,
-    callback=function(on) settings.deathEffectEnabled=on ApplyDeathEffect() end}
-
-local wastedFunc = {name="GTA Wasted", desc="Ч/б экран, WASTED и подъём камеры при смерти.", getState=function() return settings.wastedEnabled end,
-    callback=function(on) settings.wastedEnabled=on ApplyWasted() end}
-
-local rtxShadowsFunc = {name="RTX Тени", desc="Реалистичные тени + атмосфера.", getState=function() return settings.rtxShadowsEnabled end,
-    settings=function() openSettings("RTX Тени", {{name="Сила", min=0.1, max=1, default=settings.rtxShadowsIntensity, callback=function(v) settings.rtxShadowsIntensity=v ApplyRTX() end}}) end,
-    callback=function(on) settings.rtxShadowsEnabled=on ApplyRTX() end}
-
-local rtxReflectionsFunc = {name="RTX Отражения", desc="Реалистичные отражения.", getState=function() return settings.rtxReflectionsEnabled end,
-    callback=function(on) settings.rtxReflectionsEnabled=on ApplyRTX() end}
-
-local glowFunc = {name="Свечение", desc="Неоновое свечение вокруг ярких объектов.", getState=function() return settings.glowEnabled end,
-    settings=function() openSettings("Свечение", {
-        {name="Сила", min=0, max=10, default=settings.glowIntensity, callback=function(v)
-            settings.glowIntensity=v
-            ApplyGlow()
-        end}
-    }) end,
-    callback=function(on) settings.glowEnabled=on ApplyGlow() end}
-
-local auraFunc = {name="Свечение вокруг меня", desc="Светящаяся аура вокруг персонажа.", getState=function() return settings.auraEnabled end,
-    settings=function() openSettings("Свечение вокруг меня", {
-        {name="Яркость", min=0, max=20, default=settings.auraBrightness, callback=function(v)
-            settings.auraBrightness=v
-            ApplyAura()
-        end},
-        {name="Радиус", min=1, max=60, default=settings.auraRange, callback=function(v)
-            settings.auraRange=v
-            ApplyAura()
-        end}
-    }) end,
-    callback=function(on) settings.auraEnabled=on ApplyAura() end}
-
--- ===== LOOPS =====
+local FM=Instance.new("Frame",Cn)
+FM.Size=UDim2.new(1,-15,1,-50)
+FM.Position=UDim2.new(0,0,0,40)
+FM.BackgroundTransparency=1
+FM.Visible=false
+FM.ClipsDescendants=true
+local FBB=Instance.new("TextButton",FM)
+FBB.Size=UDim2.new(0,90,0,28)
+FBB.Position=UDim2.new(0,0,0,0)
+FBB.BackgroundTransparency=1
+FBB.BackgroundColor3=Color3.fromRGB(0,0,0)
+FBB.Text="← Назад"
+FBB.TextColor3=WHITE
+FBB.TextSize=12
+FBB.Font=Enum.Font.GothamBold
+FBB.BorderSizePixel=0
+FBB.AutoButtonColor=false
+FBB.TextStrokeTransparency=0.5
+FBB.TextStrokeColor3=ga()
+local fS=Instance.new("UIStroke",FBB)
+fS.Color=ga()
+fS.Thickness=1
+local FTL=Instance.new("TextLabel",FM)
+FTL.Size=UDim2.new(1,-100,0,28)
+FTL.Position=UDim2.new(0,95,0,0)
+FTL.BackgroundTransparency=1
+FTL.Text="ИЗБРАННОЕ"
+FTL.TextColor3=WHITE
+FTL.TextSize=14
+FTL.Font=Enum.Font.GothamBold
+FTL.TextXAlignment=Enum.TextXAlignment.Left
+local FS=Instance.new("ScrollingFrame",FM)
+FS.Size=UDim2.new(1,-5,1,-32)
+FS.Position=UDim2.new(0,0,0,32)
+FS.BackgroundTransparency=1
+FS.BorderSizePixel=0
+FS.ScrollBarThickness=4
+FS.ScrollBarImageColor3=ga()
+FS.ScrollBarImageTransparency=0.5
+FS.CanvasSize=UDim2.new(0,0,0,0)
+local fG=Instance.new("UIGridLayout",FS)
+fG.CellSize=UDim2.new(0.48,-4,0,70)
+fG.CellPadding=UDim2.new(0.02,0,0,8)
+FS.ChildAdded:Connect(function() task.wait() FS.CanvasSize=UDim2.new(0,0,0,fG.AbsoluteContentSize.Y+10) end)
+FS.ChildRemoved:Connect(function() task.wait() FS.CanvasSize=UDim2.new(0,0,0,fG.AbsoluteContentSize.Y+10) end)
+local function rBF()
+FS.Visible=false
+for _,c in ipairs(FS:GetChildren()) do if c:IsA("TextButton") or c:IsA("TextLabel") then c:Destroy() end end
+local hAny=false
+for n,pk in pairs(AFav) do hAny=true mkAC(FS,n,pk) end
+if not hAny then
+local lb=Instance.new("TextLabel",FS)
+lb.Size=UDim2.new(1,0,0,40)
+lb.BackgroundTransparency=1
+lb.Text="Нет избранных паков"
+lb.TextColor3=Color3.fromRGB(180,180,200)
+lb.TextSize=13
+lb.Font=Enum.Font.Gotham
+end
+task.wait(0.05)
+FS.CanvasSize=UDim2.new(0,0,0,fG.AbsoluteContentSize.Y+10)
+FS.Visible=true
+end
+local MM=Instance.new("Frame",Cn)
+MM.Size=UDim2.new(1,-15,1,-50)
+MM.Position=UDim2.new(0,0,0,40)
+MM.BackgroundTransparency=1
+MM.Visible=false
+MM.ClipsDescendants=true
+local MBB=Instance.new("TextButton",MM)
+MBB.Size=UDim2.new(0,90,0,28)
+MBB.Position=UDim2.new(0,0,0,0)
+MBB.BackgroundTransparency=1
+MBB.BackgroundColor3=Color3.fromRGB(0,0,0)
+MBB.Text="← Назад"
+MBB.TextColor3=WHITE
+MBB.TextSize=12
+MBB.Font=Enum.Font.GothamBold
+MBB.BorderSizePixel=0
+MBB.AutoButtonColor=false
+MBB.TextStrokeTransparency=0.5
+MBB.TextStrokeColor3=ga()
+local mS=Instance.new("UIStroke",MBB)
+mS.Color=ga()
+mS.Thickness=1
+local MTL=Instance.new("TextLabel",MM)
+MTL.Size=UDim2.new(1,-100,0,28)
+MTL.Position=UDim2.new(0,95,0,0)
+MTL.BackgroundTransparency=1
+MTL.Text="МИКС — свой пак"
+MTL.TextColor3=WHITE
+MTL.TextSize=14
+MTL.Font=Enum.Font.GothamBold
+MTL.TextXAlignment=Enum.TextXAlignment.Left
+local MS=Instance.new("ScrollingFrame",MM)
+MS.Size=UDim2.new(1,-5,1,-70)
+MS.Position=UDim2.new(0,0,0,32)
+MS.BackgroundTransparency=1
+MS.BorderSizePixel=0
+MS.ScrollBarThickness=4
+MS.ScrollBarImageColor3=ga()
+MS.ScrollBarImageTransparency=0.5
+MS.CanvasSize=UDim2.new(0,0,0,0)
+local mL=Instance.new("UIListLayout",MS)
+mL.Padding=UDim.new(0,5)
+mL.SortOrder=Enum.SortOrder.LayoutOrder
+MS.ChildAdded:Connect(function() task.wait() MS.CanvasSize=UDim2.new(0,0,0,mL.AbsoluteContentSize.Y+10) end)
+MS.ChildRemoved:Connect(function() task.wait() MS.CanvasSize=UDim2.new(0,0,0,mL.AbsoluteContentSize.Y+10) end)
+local mF={}
+local mFO={"idle","walk","run","jump","fall","climb","swim","swimidle"}
+local mFL={idle="Idle (покой)",walk="Walk (ходьба)",run="Run (бег)",jump="Jump (прыжок)",fall="Fall (падение)",climb="Climb (лазание)",swim="Swim (плавание)",swimidle="Swim Idle (плавание покой)"}
+for _,k in ipairs(mFO) do
+local cd=Instance.new("Frame",MS)
+cd.Size=UDim2.new(1,-10,0,36)
+cd.BackgroundColor3=gc()
+cd.BackgroundTransparency=gt()
+cd.BorderSizePixel=0
+local c1=Instance.new("UICorner",cd)
+c1.CornerRadius=UDim.new(0,8)
+local cs=Instance.new("UIStroke",cd)
+cs.Color=ga()
+cs.Thickness=1
+local lb=Instance.new("TextLabel",cd)
+lb.Size=UDim2.new(0,130,1,0)
+lb.Position=UDim2.new(0,8,0,0)
+lb.BackgroundTransparency=1
+lb.Text=mFL[k]
+lb.TextColor3=WHITE
+lb.TextSize=11
+lb.Font=Enum.Font.Gotham
+lb.TextXAlignment=Enum.TextXAlignment.Left
+local bx=Instance.new("TextBox",cd)
+bx.Size=UDim2.new(1,-148,0,24)
+bx.Position=UDim2.new(0,140,0,6)
+bx.BackgroundColor3=Color3.fromRGB(35,35,50)
+bx.BorderSizePixel=0
+bx.Text=""
+bx.PlaceholderText="ID анимации"
+bx.TextColor3=WHITE
+bx.PlaceholderColor3=Color3.fromRGB(140,140,160)
+bx.TextSize=11
+bx.Font=Enum.Font.Gotham
+bx.ClearTextOnFocus=false
+local bc=Instance.new("UICorner",bx)
+bc.CornerRadius=UDim.new(0,6)
+local bs=Instance.new("UIStroke",bx)
+bs.Color=ga()
+bs.Thickness=1
+mF[k]=bx
+end
+local MBR=Instance.new("Frame",MM)
+MBR.Size=UDim2.new(1,-10,0,26)
+MBR.Position=UDim2.new(0,5,1,-30)
+MBR.BackgroundTransparency=1
+local mbL=Instance.new("UIListLayout",MBR)
+mbL.FillDirection=Enum.FillDirection.Horizontal
+mbL.Padding=UDim.new(0,4)
+local aMB=Instance.new("TextButton",MBR)
+aMB.Size=UDim2.new(0.49,-2,1,0)
+aMB.BackgroundTransparency=1
+aMB.BackgroundColor3=Color3.fromRGB(0,0,0)
+aMB.Text="ПРИМЕНИТЬ"
+aMB.TextColor3=WHITE
+aMB.TextSize=10
+aMB.Font=Enum.Font.GothamBold
+aMB.BorderSizePixel=0
+aMB.AutoButtonColor=false
+aMB.TextStrokeTransparency=0.5
+aMB.TextStrokeColor3=ga()
+local aMS=Instance.new("UIStroke",aMB)
+aMS.Color=ga()
+aMS.Thickness=1
+aMB.MouseButton1Click:Connect(function()
+local mp={idle=mF.idle.Text:gsub("%D",""),walk=mF.walk.Text:gsub("%D",""),run=mF.run.Text:gsub("%D",""),jump=mF.jump.Text:gsub("%D",""),fall=mF.fall.Text:gsub("%D",""),climb=mF.climb.Text:gsub("%D",""),swim=mF.swim.Text:gsub("%D",""),swimidle=mF.swimidle.Text:gsub("%D","")}
+if mp.swimidle=="" then mp.swimidle=mp.idle end
+ApplyAnimPack(mp,"Custom Mix")
+aMB.Text="ПРИМЕНЕНО!"
+task.wait(1.2)
+aMB.Text="ПРИМЕНИТЬ"
+end)
+local sMB=Instance.new("TextButton",MBR)
+sMB.Size=UDim2.new(0.49,-2,1,0)
+sMB.BackgroundTransparency=1
+sMB.BackgroundColor3=Color3.fromRGB(0,0,0)
+sMB.Text="СОХРАНИТЬ"
+sMB.TextColor3=WHITE
+sMB.TextSize=10
+sMB.Font=Enum.Font.GothamBold
+sMB.BorderSizePixel=0
+sMB.AutoButtonColor=false
+sMB.TextStrokeTransparency=0.5
+sMB.TextStrokeColor3=ga()
+local sMS=Instance.new("UIStroke",sMB)
+sMS.Color=ga()
+sMS.Thickness=1
+sMB.MouseButton1Click:Connect(function()
+local mn="MyPack "..tostring(os.time()):sub(-4)
+local mp={idle=mF.idle.Text:gsub("%D",""),walk=mF.walk.Text:gsub("%D",""),run=mF.run.Text:gsub("%D",""),jump=mF.jump.Text:gsub("%D",""),fall=mF.fall.Text:gsub("%D",""),climb=mF.climb.Text:gsub("%D",""),swim=mF.swim.Text:gsub("%D",""),swimidle=mF.swimidle.Text:gsub("%D","")}
+if mp.swimidle=="" then mp.swimidle=mp.idle end
+P[mn]=mp MP[mn]=mp smix()
+rBP()
+sMB.Text="СОХРАНЕНО!"
+task.wait(1.5)
+sMB.Text="СОХРАНИТЬ"
+end)
+local aBt=mkBB("Анимации",ga())
+local fBt=mkBB("Избранное",ga())
+local mBt=mkBB("Микс",ga())
+local function hA()
+CCn.Visible=false
+AM.Visible=false
+FM.Visible=false
+MM.Visible=false
+AS.Visible=false
+FS.Visible=false
+for _,c in ipairs(AS:GetChildren()) do if c:IsA("TextButton") then c:Destroy() end end
+for _,c in ipairs(FS:GetChildren()) do if c:IsA("TextButton") or c:IsA("TextLabel") then c:Destroy() end end
+end
+aBt.MouseButton1Click:Connect(function()
+hA()
+rBP()
+task.wait(0.05)
+AM.Visible=true
+end)
+fBt.MouseButton1Click:Connect(function()
+hA()
+rBF()
+task.wait(0.05)
+FM.Visible=true
+end)
+mBt.MouseButton1Click:Connect(function()
+hA()
+task.wait(0.05)
+MM.Visible=true
+end)
+FBB.MouseButton1Click:Connect(function()
+hA()
+rBP()
+task.wait(0.05)
+AM.Visible=true
+end)
+MBB.MouseButton1Click:Connect(function()
+hA()
+rBP()
+task.wait(0.05)
+AM.Visible=true
+end)
+local function uT()
+local ac=ga()
+local tr=gt()
+M.BackgroundColor3=gc()
+if M.Visible then M.BackgroundTransparency=tr end
+SB.BackgroundColor3=gc()
+SB.BackgroundTransparency=tr
+Stk.Color=ac
+CCn.ScrollBarImageColor3=ac
+AS.ScrollBarImageColor3=ac
+FS.ScrollBarImageColor3=ac
+MS.ScrollBarImageColor3=ac
+for _,b in ipairs(cB) do b.BackgroundTransparency=tr end
+if OBtn then OBtn.BackgroundTransparency=0 OBtn.BackgroundColor3=BLACK end
+if auL and S.auraColorUseTheme then auL.Color=ac end
+for _,cd in ipairs(CCn:GetChildren()) do
+if cd:IsA("Frame") then
+cd.BackgroundTransparency=tr
+for _,ch in ipairs(cd:GetChildren()) do
+if ch:IsA("UIStroke") then ch.Color=ac
+elseif ch:IsA("TextButton") and ch.Text=="S" then ch.BackgroundColor3=ac
+elseif ch:IsA("TextButton") and (ch.Text=="OFF" or ch.Text=="ON") then
+if ch.Text=="ON" then ch.BackgroundColor3=BLACK else ch.BackgroundColor3=WHITE end
+end
+end
+end
+end
+end
+local function oSet(title,sliders)
+local ex=SG:FindFirstChild("Settings_"..title)
+if ex then ex:Destroy() return end
+local ct=#sliders
+local h=60+ct*55
+local SF=Instance.new("Frame",SG)
+SF.Name="Settings_"..title
+SF.Size=UDim2.new(0,320,0,h)
+SF.Position=UDim2.new(0.5,-160,0.5,-h/2)
+SF.BackgroundColor3=gc()
+SF.BackgroundTransparency=gt()
+SF.BorderSizePixel=0
+SF.Active=true
+local sfC=Instance.new("UICorner",SF)
+sfC.CornerRadius=UDim.new(0,12)
+local t=Instance.new("TextLabel",SF)
+t.Size=UDim2.new(1,0,0,30)
+t.Position=UDim2.new(0,0,0,10)
+t.BackgroundTransparency=1
+t.Text=title
+t.TextColor3=WHITE
+t.TextSize=15
+t.Font=Enum.Font.GothamBold
+local cb=Instance.new("TextButton",SF)
+cb.Size=UDim2.new(0,30,0,30)
+cb.Position=UDim2.new(1,-35,0,5)
+cb.BackgroundTransparency=1
+cb.Text="X"
+cb.TextColor3=WHITE
+cb.TextSize=18
+cb.Font=Enum.Font.GothamBold
+cb.MouseButton1Click:Connect(function() SF:Destroy() end)
+for i,s in ipairs(sliders) do
+local yB=45+(i-1)*55
+local lb=Instance.new("TextLabel",SF)
+lb.Size=UDim2.new(0.9,0,0,18)
+lb.Position=UDim2.new(0.05,0,0,yB)
+lb.BackgroundTransparency=1
+lb.Text=s.name..": "..string.format("%.2f",s.default)
+lb.TextColor3=WHITE
+lb.TextSize=12
+lb.Font=Enum.Font.Gotham
+lb.TextXAlignment=Enum.TextXAlignment.Left
+local sl=Instance.new("TextButton",SF)
+sl.Size=UDim2.new(0.9,0,0,16)
+sl.Position=UDim2.new(0.05,0,0,yB+22)
+sl.BackgroundColor3=Color3.fromRGB(50,40,80)
+sl.Text=""
+sl.BorderSizePixel=0
+sl.AutoButtonColor=false
+local sC=Instance.new("UICorner",sl)
+sC.CornerRadius=UDim.new(1,0)
+local fl=Instance.new("Frame",sl)
+fl.Size=UDim2.new((s.default-s.min)/(s.max-s.min),0,1,0)
+fl.BackgroundColor3=ga()
+fl.BorderSizePixel=0
+local fC=Instance.new("UICorner",fl)
+fC.CornerRadius=UDim.new(1,0)
+local kn=Instance.new("Frame",sl)
+kn.Size=UDim2.new(0,14,1,0)
+kn.Position=UDim2.new((s.default-s.min)/(s.max-s.min),-7,0,0)
+kn.BackgroundColor3=WHITE
+kn.BorderSizePixel=0
+local kC=Instance.new("UICorner",kn)
+kC.CornerRadius=UDim.new(1,0)
+local dg=false
+local function ufI(inp)
+local x=inp.Position.X
+local aX=sl.AbsolutePosition.X
+local sX=sl.AbsoluteSize.X
+if sX>0 then
+local pos=math.clamp((x-aX)/sX,0,1)
+fl.Size=UDim2.new(pos,0,1,0)
+kn.Position=UDim2.new(pos,-7,0,0)
+local val=s.min+pos*(s.max-s.min)
+lb.Text=s.name..": "..string.format("%.2f",val)
+s.callback(val)
+sCfg()
+end
+end
+sl.InputBegan:Connect(function(inp) if inp.UserInputType==Enum.UserInputType.Touch or inp.UserInputType==Enum.UserInputType.MouseButton1 then dg=true ufI(inp) end end)
+UserInputService.InputEnded:Connect(function(inp) if inp.UserInputType==Enum.UserInputType.Touch or inp.UserInputType==Enum.UserInputType.MouseButton1 then dg=false end end)
+UserInputService.InputChanged:Connect(function(inp) if dg and (inp.UserInputType==Enum.UserInputType.Touch or inp.UserInputType==Enum.UserInputType.MouseMovement) then ufI(inp) end end)
+end
+end
+local function cC(list)
+for _,ch in ipairs(CCn:GetChildren()) do if ch:IsA("Frame") then ch:Destroy() end end
+for i,f in ipairs(list) do
+local cd=Instance.new("Frame",CCn)
+cd.BackgroundColor3=gc()
+cd.BackgroundTransparency=gt()
+cd.BorderSizePixel=0
+local c1=Instance.new("UICorner",cd)
+c1.CornerRadius=UDim.new(0,10)
+local sk=Instance.new("UIStroke",cd)
+sk.Color=ga()
+sk.Thickness=1
+local tl=Instance.new("TextLabel",cd)
+tl.Size=UDim2.new(1,-70,0,18)
+tl.Position=UDim2.new(0,8,0,5)
+tl.BackgroundTransparency=1
+tl.Text=f.name
+tl.TextColor3=WHITE
+tl.TextSize=12
+tl.Font=Enum.Font.GothamBold
+tl.TextXAlignment=Enum.TextXAlignment.Left
+tl.TextTruncate=Enum.TextTruncate.AtEnd
+local ds=Instance.new("TextLabel",cd)
+ds.Size=UDim2.new(1,-16,0,24)
+ds.Position=UDim2.new(0,8,0,26)
+ds.BackgroundTransparency=1
+ds.Text=f.desc
+ds.TextColor3=WHITE
+ds.TextSize=10
+ds.Font=Enum.Font.Gotham
+ds.TextWrapped=true
+ds.TextXAlignment=Enum.TextXAlignment.Left
+if f.settings then
+local sB=Instance.new("TextButton",cd)
+sB.Size=UDim2.new(0,20,0,20)
+sB.Position=UDim2.new(1,-50,0,5)
+sB.BackgroundColor3=ga()
+sB.Text="S"
+sB.TextColor3=WHITE
+sB.TextSize=12
+sB.Font=Enum.Font.GothamBold
+sB.BorderSizePixel=0
+local s2=Instance.new("UICorner",sB)
+s2.CornerRadius=UDim.new(0,5)
+sB.MouseButton1Click:Connect(function() f.settings() end)
+end
+local tg=Instance.new("TextButton",cd)
+tg.Size=UDim2.new(0,22,0,12)
+tg.Position=UDim2.new(1,-26,0,6)
+tg.BackgroundColor3=WHITE
+tg.Text="OFF"
+tg.TextColor3=BLACK
+tg.TextSize=8
+tg.Font=Enum.Font.GothamBold
+tg.BorderSizePixel=0
+tg.AutoButtonColor=false
+local t2=Instance.new("UICorner",tg)
+t2.CornerRadius=UDim.new(1,0)
+if f.getState and f.getState() then
+tg.BackgroundColor3=BLACK tg.Text="ON" tg.TextColor3=WHITE
+end
+tg.MouseButton1Click:Connect(function()
+if f.getState then
+local ns=not f.getState()
+f.callback(ns)
+if ns then tg.BackgroundColor3=BLACK tg.Text="ON" tg.TextColor3=WHITE
+else tg.BackgroundColor3=WHITE tg.Text="OFF" tg.TextColor3=BLACK end
+sCfg()
+end
+end)
+end
+task.wait()
+CCn.CanvasSize=UDim2.new(0,0,0,cL.AbsoluteContentSize.Y+10)
+end
+local chF={name="Chams",desc="Подсветка игроков через стены.",getState=function() return S.chamsEnabled end,callback=function(on) S.chamsEnabled=on aCh() end}
+local bEF={name="Box ESP",desc="Боксы вокруг игроков.",getState=function() return S.boxEspEnabled end,callback=function(on) S.boxEspEnabled=on aBx() end}
+local sEF={name="Skeleton ESP",desc="Скелет игроков.",getState=function() return S.skeletonEspEnabled end,callback=function(on) S.skeletonEspEnabled=on aSk() end}
+local mEF={name="MM2 Chams",desc="Роли в MM2: убийца/шериф/невинный.",getState=function() return S.mm2ChamsEnabled end,callback=function(on) S.mm2ChamsEnabled=on end}
+local fvF={name="FOV",desc="Меняет поле зрения.",getState=function() return S.fovEnabled end,settings=function() oSet("FOV",{{name="FOV",min=30,max=120,default=S.fovValue,callback=function(v) S.fovValue=v aFov() end}}) end,callback=function(on) S.fovEnabled=on aFov() end}
+local stF={name="Растяг",desc="Растягивает экран.",getState=function() return S.stretchEnabled end,settings=function() oSet("Растяг",{{name="Фактор",min=50,max=100,default=S.STRETCH_FACTOR*100,callback=function(v) S.STRETCH_FACTOR=v/100 scF=CFrame.new(0,0,0,1,0,0,0,S.STRETCH_FACTOR,0,0,0,1) end}}) end,callback=function(on) S.stretchEnabled=on end}
+local pF={name="Партиклы",desc="Частицы при ходьбе.",getState=function() return S.particlesEnabled end,settings=function() oSet("Партиклы",{{name="Плотность",min=0.5,max=50,default=S.particlesDensity,callback=function(v) S.particlesDensity=v end}}) end,callback=function(on) S.particlesEnabled=on aP() end}
+local spF={name="Ворлд партиклы",desc="Ромбики вокруг игрока.",getState=function() return S.skyParticlesEnabled end,settings=function() oSet("Ворлд партиклы",{{name="Плотность",min=0.5,max=50,default=S.skyParticlesDensity,callback=function(v) S.skyParticlesDensity=v if S.skyParticlesEnabled then aSP() end end}}) end,callback=function(on) S.skyParticlesEnabled=on aSP() end}
+local tF2={name="Movement Trails",desc="Шлейф за игроком.",getState=function() return S.trailsEnabled end,settings=function() oSet("Trails",{{name="Прозрачность",min=0.1,max=1,default=S.trailsTransparency,callback=function(v) S.trailsTransparency=v end}}) end,callback=function(on) S.trailsEnabled=on aT() end}
+local tgF={name="Target ESP",desc="Ромбики на ближайшего (до 30м).",getState=function() return S.targetESPEnabled end,callback=function(on)
+S.targetESPEnabled=on
+if not on then for _,d in ipairs(eD) do if d and d.Parent then d:Destroy() end end eD={} end
+end}
+local ciF={name="Волна при прыжке",desc="Эффект капли при прыжке.",getState=function() return S.landingCircleEnabled end,settings=function() oSet("Волна при прыжке",{{name="Размер",min=0.10,max=5,default=S.rippleSize,callback=function(v) S.rippleSize=v end},{name="Прозрачность",min=0,max=1,default=S.rippleTransparency,callback=function(v) S.rippleTransparency=v end}}) end,callback=function(on) S.landingCircleEnabled=on end}
+local fgF={name="Туман",desc="Туман под цвет темы.",getState=function() return S.fogEnabled end,settings=function() oSet("Туман",{{name="Дальность",min=50,max=1000,default=S.fogEnd,callback=function(v) S.fogEnd=v aFog() end}}) end,callback=function(on) S.fogEnabled=on aFog() end}
+local skF={name="Шейдер Скай",desc="Меняет небо.",getState=function() return S.skyShaderEnabled end,callback=function(on) S.skyShaderEnabled=on aSky() end}
+local dnF={name="Ночь / День",desc="Переключить время суток.",getState=function() return S.dayNightEnabled end,settings=function() oSet("Ночь / День",{{name="Время",min=0,max=24,default=S.dayNightTime,callback=function(v) S.dayNightTime=v aDN() end}}) end,callback=function(on) S.dayNightEnabled=on aDN() end}
+local dEF={name="Death Effect",desc="Туман и неоновый столб при смерти других.",getState=function() return S.deathEffectEnabled end,callback=function(on) S.deathEffectEnabled=on aDE() end}
+local wF={name="GTA Wasted",desc="Ч/б экран, WASTED и подъём камеры при смерти.",getState=function() return S.wastedEnabled end,callback=function(on) S.wastedEnabled=on aW() end}
+local rSF={name="RTX Тени",desc="Реалистичные тени + атмосфера.",getState=function() return S.rtxShadowsEnabled end,settings=function() oSet("RTX Тени",{{name="Сила",min=0.1,max=1,default=S.rtxShadowsIntensity,callback=function(v) S.rtxShadowsIntensity=v aRTX() end}}) end,callback=function(on) S.rtxShadowsEnabled=on aRTX() end}
+local rRF={name="RTX Отражения",desc="Реалистичные отражения.",getState=function() return S.rtxReflectionsEnabled end,callback=function(on) S.rtxReflectionsEnabled=on aRTX() end}
+local glF={name="Свечение",desc="Неоновое свечение вокруг ярких объектов.",getState=function() return S.glowEnabled end,settings=function() oSet("Свечение",{{name="Сила",min=0,max=10,default=S.glowIntensity,callback=function(v) S.glowIntensity=v aGl() end}}) end,callback=function(on) S.glowEnabled=on aGl() end}
+local auF={name="Свечение вокруг меня",desc="Светящаяся аура вокруг персонажа.",getState=function() return S.auraEnabled end,settings=function() oSet("Свечение вокруг меня",{{name="Яркость",min=0,max=20,default=S.auraBrightness,callback=function(v) S.auraBrightness=v aAu() end},{name="Радиус",min=1,max=60,default=S.auraRange,callback=function(v) S.auraRange=v aAu() end}}) end,callback=function(on) S.auraEnabled=on aAu() end}
+local hlF={name="Headless",desc="Голова уходит вниз — её не видно.",getState=function() return S.headlessEnabled end,callback=function(on) S.headlessEnabled=on aHl() end}
+local htF={name="Китайская шляпа",desc="Голографическая неоновая шляпа.",getState=function() return S.hatEnabled end,callback=function(on) S.hatEnabled=on aHt() end}
 RunService.Heartbeat:Connect(function()
-    if not settings.particlesEnabled then return end
-    if not particleEmitter or not particleEmitter.Parent then
-        ApplyParticles()
-        if not particleEmitter then return end
-    end
-    local char = Player.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    particleEmitter.Color = ColorSequence.new(getAccentColor())
-    local baseRate = (hum.MoveDirection.Magnitude > 0.1) and 60 or 0
-    particleEmitter.Rate = baseRate * settings.particlesDensity
-end)
-
--- ===== THEMES =====
-local baseThemes = {
-    {name = "Фиолетовая", hue = 270},
-    {name = "Синяя", hue = 220},
-    {name = "Красная", hue = 0},
-    {name = "Зелёная", hue = 120},
-    {name = "Розовая", hue = 320},
-    {name = "Голубая", hue = 190},
-    {name = "Жёлтая", hue = 50},
-    {name = "Прозрачная", clear = true}
-}
-
-local function showThemes()
-    for _, child in ipairs(CardContainer:GetChildren()) do
-        if child:IsA("Frame") then child:Destroy() end
-    end
-    SectionTitle.Text = "Темы"
-    for i, t in ipairs(baseThemes) do
-        local card = Instance.new("Frame", CardContainer)
-        card.BackgroundColor3 = getThemeColor()
-        card.BackgroundTransparency = 0.85
-        card.BorderSizePixel = 0
-        local cc = Instance.new("UICorner", card)
-        cc.CornerRadius = UDim.new(0, 10)
-        local stroke = Instance.new("UIStroke", card)
-        stroke.Color = t.clear and WHITE or Color3.fromHSV(t.hue / 360, 0.7, 0.9)
-        stroke.Thickness = 2
-        local title = Instance.new("TextLabel", card)
-        title.Size = UDim2.new(1, 0, 0, 20)
-        title.Position = UDim2.new(0, 0, 0.2, 0)
-        title.BackgroundTransparency = 1
-        title.Text = t.name
-        title.TextColor3 = WHITE
-        title.TextSize = 14
-        title.Font = Enum.Font.GothamBold
-        local btn = Instance.new("TextButton", card)
-        btn.Size = UDim2.new(1, 0, 1, 0)
-        btn.BackgroundTransparency = 1
-        btn.Text = ""
-        btn.MouseButton1Click:Connect(function()
-            themeCustomColor = nil
-            if t.clear then
-                themeIsClear = true
-            else
-                themeIsClear = false
-                themeHue = t.hue
-            end
-            updateTheme()
-            SaveConfig()
-            ApplyChams()
-        end)
-    end
-
-    local hueCard = Instance.new("Frame", CardContainer)
-    hueCard.Size = UDim2.new(0.96, 0, 0, 100)
-    hueCard.BackgroundColor3 = getThemeColor()
-    hueCard.BackgroundTransparency = 0.85
-    hueCard.BorderSizePixel = 0
-    local hcCorner = Instance.new("UICorner", hueCard)
-    hcCorner.CornerRadius = UDim.new(0, 10)
-    local hcStroke = Instance.new("UIStroke", hueCard)
-    hcStroke.Color = getAccentColor()
-    hcStroke.Thickness = 2
-
-    local hueLabel = Instance.new("TextLabel", hueCard)
-    hueLabel.Size = UDim2.new(1, 0, 0, 20)
-    hueLabel.Position = UDim2.new(0, 0, 0.05, 0)
-    hueLabel.BackgroundTransparency = 1
-    hueLabel.Text = "Свой оттенок: " .. themeHue
-    hueLabel.TextColor3 = WHITE
-    hueLabel.TextSize = 14
-    hueLabel.Font = Enum.Font.GothamBold
-
-    local slider = Instance.new("TextButton", hueCard)
-    slider.Size = UDim2.new(0.9, 0, 0, 20)
-    slider.Position = UDim2.new(0.05, 0, 0.4, 0)
-    slider.BackgroundColor3 = Color3.fromRGB(60, 60, 60)
-    slider.Text = ""
-    slider.BorderSizePixel = 0
-    slider.AutoButtonColor = false
-    local sCorner = Instance.new("UICorner", slider)
-    sCorner.CornerRadius = UDim.new(1, 0)
-
-    local gradient = Instance.new("UIGradient", slider)
-    gradient.Color = ColorSequence.new({
-        ColorSequenceKeypoint.new(0, Color3.fromRGB(255, 0, 0)),
-        ColorSequenceKeypoint.new(0.17, Color3.fromRGB(255, 255, 0)),
-        ColorSequenceKeypoint.new(0.33, Color3.fromRGB(0, 255, 0)),
-        ColorSequenceKeypoint.new(0.5, Color3.fromRGB(0, 255, 255)),
-        ColorSequenceKeypoint.new(0.67, Color3.fromRGB(0, 0, 255)),
-        ColorSequenceKeypoint.new(0.83, Color3.fromRGB(255, 0, 255)),
-        ColorSequenceKeypoint.new(1, Color3.fromRGB(255, 0, 0)),
-    })
-
-    local knob = Instance.new("Frame", slider)
-    knob.Size = UDim2.new(0, 18, 0, 18)
-    knob.Position = UDim2.new(themeHue / 360, -9, 0.5, -9)
-    knob.BackgroundColor3 = WHITE
-    knob.BorderSizePixel = 0
-    local kCorner = Instance.new("UICorner", knob)
-    kCorner.CornerRadius = UDim.new(1, 0)
-
-    local dragging = false
-    local function updateFromInput(input)
-        local x = input.Position.X
-        local absX = slider.AbsolutePosition.X
-        local sizeX = slider.AbsoluteSize.X
-        if sizeX > 0 then
-            local pos = math.clamp((x - absX) / sizeX, 0, 1)
-            themeHue = math.floor(pos * 360)
-            themeCustomColor = nil
-            themeIsClear = false
-            hueLabel.Text = "Свой оттенок: " .. themeHue
-            knob.Position = UDim2.new(pos, -9, 0.5, -9)
-            updateTheme()
-            SaveConfig()
-            ApplyChams()
-        end
-    end
-    slider.InputBegan:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = true updateFromInput(input)
-        end
-    end)
-    UserInputService.InputEnded:Connect(function(input)
-        if input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseButton1 then
-            dragging = false
-        end
-    end)
-    UserInputService.InputChanged:Connect(function(input)
-        if dragging and (input.UserInputType == Enum.UserInputType.Touch or input.UserInputType == Enum.UserInputType.MouseMovement) then
-            updateFromInput(input)
-        end
-    end)
-    task.wait()
-    CardContainer.CanvasSize = UDim2.new(0, 0, 0, cardLayout.AbsoluteContentSize.Y + 10)
+if not S.targetESPEnabled then
+for _,d in ipairs(eD) do if d and d.Parent then d:Destroy() end end
+eD={} eTC=nil
+return
 end
-
--- ===== RADIO =====
-local function showRadio()
-    SectionTitle.Text = "Радио"
-    for _, child in ipairs(CardContainer:GetChildren()) do
-        if child:IsA("Frame") then child:Destroy() end
-    end
-
-    local function makeField(placeholder)
-        local card = Instance.new("Frame", CardContainer)
-        card.Size = UDim2.new(0.96, 0, 0, 46)
-        card.BackgroundColor3 = getThemeColor()
-        card.BackgroundTransparency = getTransparency()
-        card.BorderSizePixel = 0
-        local c = Instance.new("UICorner", card)
-        c.CornerRadius = UDim.new(0, 8)
-        local s = Instance.new("UIStroke", card)
-        s.Color = getAccentColor()
-        s.Thickness = 1
-
-        local box = Instance.new("TextBox", card)
-        box.Size = UDim2.new(1, -16, 0, 26)
-        box.Position = UDim2.new(0, 8, 0, 10)
-        box.BackgroundColor3 = Color3.fromRGB(35, 35, 50)
-        box.BorderSizePixel = 0
-        box.Text = ""
-        box.PlaceholderText = placeholder
-        box.TextColor3 = WHITE
-        box.PlaceholderColor3 = Color3.fromRGB(150, 150, 170)
-        box.TextSize = 12
-        box.Font = Enum.Font.Gotham
-        box.ClearTextOnFocus = false
-        local bc = Instance.new("UICorner", box)
-        bc.CornerRadius = UDim.new(0, 6)
-        return box
-    end
-
-    local idBox = makeField("Айди песни")
-    local nameBox = makeField("Название")
-
-    local btnCard = Instance.new("Frame", CardContainer)
-    btnCard.Size = UDim2.new(0.96, 0, 0, 40)
-    btnCard.BackgroundColor3 = getThemeColor()
-    btnCard.BackgroundTransparency = getTransparency()
-    btnCard.BorderSizePixel = 0
-    local bc = Instance.new("UICorner", btnCard)
-    bc.CornerRadius = UDim.new(0, 8)
-    local bstroke = Instance.new("UIStroke", btnCard)
-    bstroke.Color = getAccentColor()
-    bstroke.Thickness = 1
-
-    local addBtn = Instance.new("TextButton", btnCard)
-    addBtn.Size = UDim2.new(0.47, -8, 0, 26)
-    addBtn.Position = UDim2.new(0, 8, 0, 7)
-    addBtn.BackgroundColor3 = getThemeColor()
-    addBtn.Text = "Добавить"
-    addBtn.TextColor3 = WHITE
-    addBtn.TextSize = 12
-    addBtn.Font = Enum.Font.GothamBold
-    addBtn.BorderSizePixel = 0
-    addBtn.AutoButtonColor = false
-    addBtn.TextStrokeTransparency = 1
-    local abc = Instance.new("UICorner", addBtn)
-    abc.CornerRadius = UDim.new(0, 6)
-
-    local playBtn = Instance.new("TextButton", btnCard)
-    playBtn.Size = UDim2.new(0.47, -8, 0, 26)
-    playBtn.Position = UDim2.new(0.5, 4, 0, 7)
-    playBtn.BackgroundColor3 = getThemeColor()
-    playBtn.Text = radioIsPlaying and "Пауза" or "Играть"
-    playBtn.TextColor3 = WHITE
-    playBtn.TextSize = 12
-    playBtn.Font = Enum.Font.GothamBold
-    playBtn.BorderSizePixel = 0
-    playBtn.AutoButtonColor = false
-    playBtn.TextStrokeTransparency = 1
-    local pbc = Instance.new("UICorner", playBtn)
-    pbc.CornerRadius = UDim.new(0, 6)
-
-    addBtn.MouseButton1Click:Connect(function()
-        local idText = idBox.Text:gsub("%D", "")
-        local nameText = nameBox.Text
-        if idText == "" then return end
-        if nameText == "" then nameText = "Track " .. idText end
-        table.insert(radioSongs, {id = tonumber(idText), name = nameText})
-        SaveRadio()
-        idBox.Text = ""
-        nameBox.Text = ""
-        showRadio()
-    end)
-
-    playBtn.MouseButton1Click:Connect(function()
-        toggleRadioPlay()
-        showRadio()
-    end)
-
-    local headerCard = Instance.new("Frame", CardContainer)
-    headerCard.Size = UDim2.new(0.96, 0, 0, 30)
-    headerCard.BackgroundColor3 = getThemeColor()
-    headerCard.BackgroundTransparency = getTransparency()
-    headerCard.BorderSizePixel = 0
-    local hcc = Instance.new("UICorner", headerCard)
-    hcc.CornerRadius = UDim.new(0, 8)
-
-    local headerLbl = Instance.new("TextLabel", headerCard)
-    headerLbl.Size = UDim2.new(1, -16, 1, 0)
-    headerLbl.Position = UDim2.new(0, 8, 0, 0)
-    headerLbl.BackgroundTransparency = 1
-    headerLbl.Text = "Список песен"
-    headerLbl.TextColor3 = WHITE
-    headerLbl.TextSize = 13
-    headerLbl.Font = Enum.Font.GothamBold
-    headerLbl.TextXAlignment = Enum.TextXAlignment.Left
-    headerLbl.TextStrokeTransparency = 1
-
-    for i, song in ipairs(radioSongs) do
-        local songCard = Instance.new("Frame", CardContainer)
-        songCard.Size = UDim2.new(0.96, 0, 0, 40)
-        songCard.BackgroundColor3 = getThemeColor()
-        songCard.BackgroundTransparency = getTransparency()
-        songCard.BorderSizePixel = 0
-        local scc = Instance.new("UICorner", songCard)
-        scc.CornerRadius = UDim.new(0, 8)
-        local sstroke = Instance.new("UIStroke", songCard)
-        sstroke.Color = getAccentColor()
-        sstroke.Thickness = 1
-
-        local num = Instance.new("TextLabel", songCard)
-        num.Size = UDim2.new(0, 24, 1, 0)
-        num.Position = UDim2.new(0, 4, 0, 0)
-        num.BackgroundTransparency = 1
-        num.Text = tostring(i)
-        num.TextColor3 = getAccentColor()
-        num.TextSize = 12
-        num.Font = Enum.Font.GothamBold
-        num.TextStrokeTransparency = 1
-
-        local nm = Instance.new("TextLabel", songCard)
-        nm.Size = UDim2.new(1, -120, 1, 0)
-        nm.Position = UDim2.new(0, 30, 0, 0)
-        nm.BackgroundTransparency = 1
-        nm.Text = song.name .. "  [" .. tostring(song.id) .. "]"
-        nm.TextColor3 = WHITE
-        nm.TextSize = 11
-        nm.Font = Enum.Font.Gotham
-        nm.TextXAlignment = Enum.TextXAlignment.Left
-        nm.TextTruncate = Enum.TextTruncate.AtEnd
-        nm.TextStrokeTransparency = 1
-
-        local spb = Instance.new("TextButton", songCard)
-        spb.Size = UDim2.new(0, 40, 0, 26)
-        spb.Position = UDim2.new(1, -80, 0, 7)
-        spb.BackgroundColor3 = getThemeColor()
-        spb.Text = "Играть"
-        spb.TextColor3 = WHITE
-        spb.TextSize = 10
-        spb.Font = Enum.Font.GothamBold
-        spb.BorderSizePixel = 0
-        spb.AutoButtonColor = false
-        spb.TextStrokeTransparency = 1
-        local spbc = Instance.new("UICorner", spb)
-        spbc.CornerRadius = UDim.new(0, 6)
-        spb.MouseButton1Click:Connect(function()
-            playRadioIndex(i)
-            showRadio()
-        end)
-
-        local sdb = Instance.new("TextButton", songCard)
-        sdb.Size = UDim2.new(0, 32, 0, 26)
-        sdb.Position = UDim2.new(1, -36, 0, 7)
-        sdb.BackgroundColor3 = getThemeColor()
-        sdb.Text = "X"
-        sdb.TextColor3 = WHITE
-        sdb.TextSize = 11
-        sdb.Font = Enum.Font.GothamBold
-        sdb.BorderSizePixel = 0
-        sdb.AutoButtonColor = false
-        sdb.TextStrokeTransparency = 1
-        local sdbc = Instance.new("UICorner", sdb)
-        sdbc.CornerRadius = UDim.new(0, 6)
-        sdb.MouseButton1Click:Connect(function()
-            table.remove(radioSongs, i)
-            if radioCurrentIndex == i then stopRadio() end
-            SaveRadio()
-            showRadio()
-        end)
-    end
-
-    task.wait()
-    CardContainer.CanvasSize = UDim2.new(0, 0, 0, cardLayout.AbsoluteContentSize.Y + 10)
+local c=Player.Character
+if not c then return end
+local hrp=c:FindFirstChild("HumanoidRootPart")
+if not hrp then return end
+local cl,cd=nil,30
+for _,p in ipairs(Players:GetPlayers()) do
+if p~=Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") then
+local th=p.Character.HumanoidRootPart
+local d=(th.Position-hrp.Position).Magnitude
+if d<cd then cd=d cl=p.Character end
 end
-
--- ===== ВКЛАДКИ =====
-catButtons[1].MouseButton1Click:Connect(function()
-    SectionTitle.Text = "Комбат"
-    hideAll()
-    CardContainer.Visible = true
-    createCards({chamsFunc, boxEspFunc, skeletonEspFunc, mm2ChamsFunc})
+end
+if cl then
+local th=cl:FindFirstChild("HumanoidRootPart")
+if th then
+if #eD<8 then
+for _,d in ipairs(eD) do if d and d.Parent then d:Destroy() end end
+eD={}
+for i=1,8 do
+local pt=Instance.new("Part")
+pt.Size=Vector3.new(0.7,0.7,0.7)
+pt.Anchored=true
+pt.CanCollide=false
+pt.Material=Enum.Material.Neon
+pt.Color=ga()
+pt.Transparency=0.2
+pt.CFrame=CFrame.new(0,0,0)*CFrame.Angles(math.rad(45),math.rad(45),0)
+pt.Parent=workspace
+table.insert(eD,pt)
+end
+end
+eA=eA+0.05
+local ctr=th.Position
+local rd=2.5
+if not eTC then eTC=CFrame.new(ctr)
+else
+local tc=CFrame.new(ctr)
+local d2=(eTC.Position-ctr).Magnitude
+local al=d2>20 and 0.03 or 0.15
+eTC=eTC:Lerp(tc,al)
+end
+local sc=eTC.Position
+for i,pt in ipairs(eD) do
+if pt then
+local an=eA+(i-1)*(math.pi*2/8)
+local x=math.cos(an)*rd
+local z=math.sin(an)*rd
+local y=math.sin(eA*2+i)*1.5
+pt.CFrame=CFrame.new(sc+Vector3.new(x,y,z))*CFrame.Angles(math.rad(45),eA,math.rad(45))
+pt.Color=ga()
+end
+end
+end
+else
+for _,d in ipairs(eD) do if d and d.Parent then d:Destroy() end end
+eD={} eTC=nil
+end
 end)
-catButtons[2].MouseButton1Click:Connect(function()
-    SectionTitle.Text = "Визуал"
-    hideAll()
-    CardContainer.Visible = true
-    createCards({stretchFunc, particlesFunc, trailsFunc, circleFunc, dayNightFunc, deathEffectFunc, wastedFunc})
+RunService.Heartbeat:Connect(function()
+if not S.particlesEnabled then return end
+if not ptE or not ptE.Parent then
+aP()
+if not ptE then return end
+end
+local c=Player.Character
+if not c then return end
+local h=c:FindFirstChildOfClass("Humanoid")
+if not h then return end
+ptE.Color=ColorSequence.new(ga())
+local br=(h.MoveDirection.Magnitude>0.1) and 60 or 0
+ptE.Rate=br*S.particlesDensity
 end)
-catButtons[3].MouseButton1Click:Connect(function()
-    SectionTitle.Text = "Шейдеры"
-    hideAll()
-    CardContainer.Visible = true
-    createCards({rtxShadowsFunc, rtxReflectionsFunc, glowFunc, auraFunc})
+local function spR(ps)
+for i=1,4 do
+task.delay(i*0.04,function()
+local rg=Instance.new("Part")
+rg.Shape=Enum.PartType.Cylinder
+rg.Size=Vector3.new(0.1,1,1)
+rg.CFrame=CFrame.new(ps)*CFrame.Angles(0,0,math.rad(90))
+rg.Anchored=true
+rg.CanCollide=false
+rg.Material=Enum.Material.Neon
+rg.Color=ga()
+rg.Transparency=S.rippleTransparency
+rg.Parent=workspace
+local tw=TweenService:Create(rg,TweenInfo.new(0.5,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Size=Vector3.new(0.1,(10+i*3)*S.rippleSize,(10+i*3)*S.rippleSize),Transparency=1})
+tw:Play()
+tw.Completed:Connect(function() rg:Destroy() end)
 end)
-catButtons[4].MouseButton1Click:Connect(function()
-    SectionTitle.Text = "Анимации"
-    hideAll()
-    rebuildPacks()
-    task.wait(0.05)
-    AnimMain.Visible = true
+end
+end
+local wj=false
+RunService.Heartbeat:Connect(function()
+if not S.landingCircleEnabled then return end
+local c=Player.Character
+if not c then return end
+local h=c:FindFirstChildOfClass("Humanoid")
+if not h then return end
+local st=h:GetState()
+local ij=st==Enum.HumanoidStateType.Jumping or st==Enum.HumanoidStateType.Freefall
+if ij~=wj then
+wj=ij
+local hrp=c:FindFirstChild("HumanoidRootPart")
+if hrp then spR(hrp.Position-Vector3.new(0,3,0)) end
+end
 end)
-catButtons[5].MouseButton1Click:Connect(function()
-    SectionTitle.Text = "Радио"
-    hideAll()
-    CardContainer.Visible = true
-    showRadio()
+local bTh={{name="Фиолетовая",hue=270},{name="Синяя",hue=220},{name="Красная",hue=0},{name="Зелёная",hue=120},{name="Розовая",hue=320},{name="Голубая",hue=190},{name="Жёлтая",hue=50},{name="Прозрачная",clear=true}}
+local function sTh()
+for _,ch in ipairs(CCn:GetChildren()) do if ch:IsA("Frame") then ch:Destroy() end end
+ST.Text="Темы"
+for i,t in ipairs(bTh) do
+local cd=Instance.new("Frame",CCn)
+cd.BackgroundColor3=gc()
+cd.BackgroundTransparency=0.85
+cd.BorderSizePixel=0
+local c1=Instance.new("UICorner",cd)
+c1.CornerRadius=UDim.new(0,10)
+local sk=Instance.new("UIStroke",cd)
+sk.Color=t.clear and WHITE or Color3.fromHSV(t.hue/360,0.7,0.9)
+sk.Thickness=2
+local tl=Instance.new("TextLabel",cd)
+tl.Size=UDim2.new(1,0,0,20)
+tl.Position=UDim2.new(0,0,0.2,0)
+tl.BackgroundTransparency=1
+tl.Text=t.name
+tl.TextColor3=WHITE
+tl.TextSize=14
+tl.Font=Enum.Font.GothamBold
+local bt=Instance.new("TextButton",cd)
+bt.Size=UDim2.new(1,0,1,0)
+bt.BackgroundTransparency=1
+bt.Text=""
+bt.MouseButton1Click:Connect(function()
+themeCustomColor=nil
+if t.clear then themeIsClear=true
+else themeIsClear=false themeHue=t.hue end
+uT()
+sCfg()
+aCh()
 end)
-catButtons[6].MouseButton1Click:Connect(function()
-    SectionTitle.Text = "Темы"
-    hideAll()
-    CardContainer.Visible = true
-    showThemes()
+end
+local hC=Instance.new("Frame",CCn)
+hC.Size=UDim2.new(0.96,0,0,100)
+hC.BackgroundColor3=gc()
+hC.BackgroundTransparency=0.85
+hC.BorderSizePixel=0
+local hc1=Instance.new("UICorner",hC)
+hc1.CornerRadius=UDim.new(0,10)
+local hs=Instance.new("UIStroke",hC)
+hs.Color=ga()
+hs.Thickness=2
+local hL=Instance.new("TextLabel",hC)
+hL.Size=UDim2.new(1,0,0,20)
+hL.Position=UDim2.new(0,0,0.05,0)
+hL.BackgroundTransparency=1
+hL.Text="Свой оттенок: "..themeHue
+hL.TextColor3=WHITE
+hL.TextSize=14
+hL.Font=Enum.Font.GothamBold
+local sl=Instance.new("TextButton",hC)
+sl.Size=UDim2.new(0.9,0,0,20)
+sl.Position=UDim2.new(0.05,0,0.4,0)
+sl.BackgroundColor3=Color3.fromRGB(60,60,60)
+sl.Text=""
+sl.BorderSizePixel=0
+sl.AutoButtonColor=false
+local sc1=Instance.new("UICorner",sl)
+sc1.CornerRadius=UDim.new(1,0)
+local gr=Instance.new("UIGradient",sl)
+gr.Color=ColorSequence.new({ColorSequenceKeypoint.new(0,Color3.fromRGB(255,0,0)),ColorSequenceKeypoint.new(0.17,Color3.fromRGB(255,255,0)),ColorSequenceKeypoint.new(0.33,Color3.fromRGB(0,255,0)),ColorSequenceKeypoint.new(0.5,Color3.fromRGB(0,255,255)),ColorSequenceKeypoint.new(0.67,Color3.fromRGB(0,0,255)),ColorSequenceKeypoint.new(0.83,Color3.fromRGB(255,0,255)),ColorSequenceKeypoint.new(1,Color3.fromRGB(255,0,0))})
+local kn=Instance.new("Frame",sl)
+kn.Size=UDim2.new(0,18,0,18)
+kn.Position=UDim2.new(themeHue/360,-9,0.5,-9)
+kn.BackgroundColor3=WHITE
+kn.BorderSizePixel=0
+local kC=Instance.new("UICorner",kn)
+kC.CornerRadius=UDim.new(1,0)
+local dg=false
+local function ufI(inp)
+local x=inp.Position.X
+local aX=sl.AbsolutePosition.X
+local sX=sl.AbsoluteSize.X
+if sX>0 then
+local pos=math.clamp((x-aX)/sX,0,1)
+themeHue=math.floor(pos*360)
+themeCustomColor=nil
+themeIsClear=false
+hL.Text="Свой оттенок: "..themeHue
+kn.Position=UDim2.new(pos,-9,0.5,-9)
+uT()
+sCfg()
+aCh()
+end
+end
+sl.InputBegan:Connect(function(inp) if inp.UserInputType==Enum.UserInputType.Touch or inp.UserInputType==Enum.UserInputType.MouseButton1 then dg=true ufI(inp) end end)
+UserInputService.InputEnded:Connect(function(inp) if inp.UserInputType==Enum.UserInputType.Touch or inp.UserInputType==Enum.UserInputType.MouseButton1 then dg=false end end)
+UserInputService.InputChanged:Connect(function(inp) if dg and (inp.UserInputType==Enum.UserInputType.Touch or inp.UserInputType==Enum.UserInputType.MouseMovement) then ufI(inp) end end)
+task.wait()
+CCn.CanvasSize=UDim2.new(0,0,0,cL.AbsoluteContentSize.Y+10)
+end
+local function sR()
+ST.Text="Радио"
+for _,ch in ipairs(CCn:GetChildren()) do if ch:IsA("Frame") then ch:Destroy() end end
+local function mkF(ph)
+local cd=Instance.new("Frame",CCn)
+cd.Size=UDim2.new(0.96,0,0,46)
+cd.BackgroundColor3=gc()
+cd.BackgroundTransparency=gt()
+cd.BorderSizePixel=0
+local c1=Instance.new("UICorner",cd)
+c1.CornerRadius=UDim.new(0,8)
+local sk=Instance.new("UIStroke",cd)
+sk.Color=ga()
+sk.Thickness=1
+local bx=Instance.new("TextBox",cd)
+bx.Size=UDim2.new(1,-16,0,26)
+bx.Position=UDim2.new(0,8,0,10)
+bx.BackgroundColor3=Color3.fromRGB(35,35,50)
+bx.BorderSizePixel=0
+bx.Text=""
+bx.PlaceholderText=ph
+bx.TextColor3=WHITE
+bx.PlaceholderColor3=Color3.fromRGB(150,150,170)
+bx.TextSize=12
+bx.Font=Enum.Font.Gotham
+bx.ClearTextOnFocus=false
+local bc=Instance.new("UICorner",bx)
+bc.CornerRadius=UDim.new(0,6)
+return bx
+end
+local iB=mkF("Айди песни")
+local nB=mkF("Название")
+local bC=Instance.new("Frame",CCn)
+bC.Size=UDim2.new(0.96,0,0,40)
+bC.BackgroundColor3=gc()
+bC.BackgroundTransparency=gt()
+bC.BorderSizePixel=0
+local bc1=Instance.new("UICorner",bC)
+bc1.CornerRadius=UDim.new(0,8)
+local bs=Instance.new("UIStroke",bC)
+bs.Color=ga()
+bs.Thickness=1
+local aB=Instance.new("TextButton",bC)
+aB.Size=UDim2.new(0.47,-8,0,26)
+aB.Position=UDim2.new(0,8,0,7)
+aB.BackgroundColor3=gc()
+aB.Text="Добавить"
+aB.TextColor3=WHITE
+aB.TextSize=12
+aB.Font=Enum.Font.GothamBold
+aB.BorderSizePixel=0
+aB.AutoButtonColor=false
+aB.TextStrokeTransparency=1
+local aC=Instance.new("UICorner",aB)
+aC.CornerRadius=UDim.new(0,6)
+local pB=Instance.new("TextButton",bC)
+pB.Size=UDim2.new(0.47,-8,0,26)
+pB.Position=UDim2.new(0.5,4,0,7)
+pB.BackgroundColor3=gc()
+pB.Text=rPlay and "Пауза" or "Играть"
+pB.TextColor3=WHITE
+pB.TextSize=12
+pB.Font=Enum.Font.GothamBold
+pB.BorderSizePixel=0
+pB.AutoButtonColor=false
+pB.TextStrokeTransparency=1
+local pC=Instance.new("UICorner",pB)
+pC.CornerRadius=UDim.new(0,6)
+aB.MouseButton1Click:Connect(function()
+local it=iB.Text:gsub("%D","")
+local nt=nB.Text
+if it=="" then return end
+if nt=="" then nt="Track "..it end
+table.insert(RS,{id=tonumber(it),name=nt})
+sR()
+iB.Text=""
+nB.Text=""
+sR()
 end)
-
--- ===== ДИНАМИК =====
-local OpenBtn = Instance.new("TextButton", ScreenGui)
-OpenBtn.Size = UDim2.new(0, 200, 0, 30)
-OpenBtn.Position = UDim2.new(0.5, 0, -0.03, 0)
-OpenBtn.AnchorPoint = Vector2.new(0.5, 0)
-OpenBtn.BackgroundColor3 = BLACK
-OpenBtn.BackgroundTransparency = 0
-OpenBtn.TextColor3 = WHITE
-OpenBtn.TextSize = 12
-OpenBtn.Font = Enum.Font.GothamBold
-OpenBtn.BorderSizePixel = 0
-OpenBtn.Text = ""
-OpenBtn.ZIndex = 2
-OpenBtn.AutoButtonColor = false
-local oc = Instance.new("UICorner", OpenBtn)
-oc.CornerRadius = UDim.new(0, 15)
-
-local SpeakerLabel = Instance.new("TextLabel", OpenBtn)
-SpeakerLabel.Size = UDim2.new(1, -12, 1, 0)
-SpeakerLabel.Position = UDim2.new(0, 6, 0, 0)
-SpeakerLabel.BackgroundTransparency = 1
-SpeakerLabel.Text = "MONVISUAL  FPS: " .. fpsValue
-SpeakerLabel.TextColor3 = WHITE
-SpeakerLabel.TextSize = 12
-SpeakerLabel.Font = Enum.Font.GothamBold
-SpeakerLabel.TextXAlignment = Enum.TextXAlignment.Center
-SpeakerLabel.TextTruncate = Enum.TextTruncate.AtEnd
-SpeakerLabel.TextStrokeTransparency = 1
-SpeakerLabel.ZIndex = 3
-
-local wasRadioPlaying = false
+pB.MouseButton1Click:Connect(function() togR() sR() end)
+local hC2=Instance.new("Frame",CCn)
+hC2.Size=UDim2.new(0.96,0,0,30)
+hC2.BackgroundColor3=gc()
+hC2.BackgroundTransparency=gt()
+hC2.BorderSizePixel=0
+local hc2=Instance.new("UICorner",hC2)
+hc2.CornerRadius=UDim.new(0,8)
+local hL2=Instance.new("TextLabel",hC2)
+hL2.Size=UDim2.new(1,-16,1,0)
+hL2.Position=UDim2.new(0,8,0,0)
+hL2.BackgroundTransparency=1
+hL2.Text="Список песен"
+hL2.TextColor3=WHITE
+hL2.TextSize=13
+hL2.Font=Enum.Font.GothamBold
+hL2.TextXAlignment=Enum.TextXAlignment.Left
+hL2.TextStrokeTransparency=1
+for i,sg in ipairs(RS) do
+local sc=Instance.new("Frame",CCn)
+sc.Size=UDim2.new(0.96,0,0,40)
+sc.BackgroundColor3=gc()
+sc.BackgroundTransparency=gt()
+sc.BorderSizePixel=0
+local s1=Instance.new("UICorner",sc)
+s1.CornerRadius=UDim.new(0,8)
+local s2=Instance.new("UIStroke",sc)
+s2.Color=ga()
+s2.Thickness=1
+local nm=Instance.new("TextLabel",sc)
+nm.Size=UDim2.new(0,24,1,0)
+nm.Position=UDim2.new(0,4,0,0)
+nm.BackgroundTransparency=1
+nm.Text=tostring(i)
+nm.TextColor3=ga()
+nm.TextSize=12
+nm.Font=Enum.Font.GothamBold
+nm.TextStrokeTransparency=1
+local nl=Instance.new("TextLabel",sc)
+nl.Size=UDim2.new(1,-120,1,0)
+nl.Position=UDim2.new(0,30,0,0)
+nl.BackgroundTransparency=1
+nl.Text=sg.name.."  ["..tostring(sg.id).."]"
+nl.TextColor3=WHITE
+nl.TextSize=11
+nl.Font=Enum.Font.Gotham
+nl.TextXAlignment=Enum.TextXAlignment.Left
+nl.TextTruncate=Enum.TextTruncate.AtEnd
+nl.TextStrokeTransparency=1
+local sp=Instance.new("TextButton",sc)
+sp.Size=UDim2.new(0,40,0,26)
+sp.Position=UDim2.new(1,-80,0,7)
+sp.BackgroundColor3=gc()
+sp.Text="Играть"
+sp.TextColor3=WHITE
+sp.TextSize=10
+sp.Font=Enum.Font.GothamBold
+sp.BorderSizePixel=0
+sp.AutoButtonColor=false
+sp.TextStrokeTransparency=1
+local spc=Instance.new("UICorner",sp)
+spc.CornerRadius=UDim.new(0,6)
+sp.MouseButton1Click:Connect(function() playRI(i) sR() end)
+local sd=Instance.new("TextButton",sc)
+sd.Size=UDim2.new(0,32,0,26)
+sd.Position=UDim2.new(1,-36,0,7)
+sd.BackgroundColor3=gc()
+sd.Text="X"
+sd.TextColor3=WHITE
+sd.TextSize=11
+sd.Font=Enum.Font.GothamBold
+sd.BorderSizePixel=0
+sd.AutoButtonColor=false
+sd.TextStrokeTransparency=1
+local sdc=Instance.new("UICorner",sd)
+sdc.CornerRadius=UDim.new(0,6)
+sd.MouseButton1Click:Connect(function()
+table.remove(RS,i)
+if rci==i then stopR() end
+sR()
+sR()
+end)
+end
+task.wait()
+CCn.CanvasSize=UDim2.new(0,0,0,cL.AbsoluteContentSize.Y+10)
+end
+cB[1].MouseButton1Click:Connect(function()
+ST.Text="Комбат"
+hA()
+CCn.Visible=true
+cC({chF,bEF,sEF,mEF})
+end)
+cB[2].MouseButton1Click:Connect(function()
+ST.Text="Визуал"
+hA()
+CCn.Visible=true
+cC({fvF,stF,pF,spF,tF2,tgF,ciF,fgF,skF,dnF,dEF,wF})
+end)
+cB[3].MouseButton1Click:Connect(function()
+ST.Text="Косметика"
+hA()
+CCn.Visible=true
+cC({hlF,htF})
+end)
+cB[4].MouseButton1Click:Connect(function()
+ST.Text="Шейдеры"
+hA()
+CCn.Visible=true
+cC({rSF,rRF,glF,auF})
+end)
+cB[5].MouseButton1Click:Connect(function()
+ST.Text="Анимации"
+hA()
+rBP()
+task.wait(0.05)
+AM.Visible=true
+end)
+cB[6].MouseButton1Click:Connect(function()
+ST.Text="Радио"
+hA()
+CCn.Visible=true
+sR()
+end)
+cB[7].MouseButton1Click:Connect(function()
+ST.Text="Темы"
+hA()
+CCn.Visible=true
+sTh()
+end)
+local OBtn=Instance.new("TextButton",SG)
+OBtn.Size=UDim2.new(0,200,0,30)
+OBtn.Position=UDim2.new(0.5,0,-0.03,0)
+OBtn.AnchorPoint=Vector2.new(0.5,0)
+OBtn.BackgroundColor3=BLACK
+OBtn.BackgroundTransparency=0
+OBtn.TextColor3=WHITE
+OBtn.TextSize=12
+OBtn.Font=Enum.Font.GothamBold
+OBtn.BorderSizePixel=0
+OBtn.Text=""
+OBtn.ZIndex=2
+OBtn.AutoButtonColor=false
+local oC=Instance.new("UICorner",OBtn)
+oC.CornerRadius=UDim.new(0,15)
+local SLb=Instance.new("TextLabel",OBtn)
+SLb.Size=UDim2.new(1,-12,1,0)
+SLb.Position=UDim2.new(0,6,0,0)
+SLb.BackgroundTransparency=1
+SLb.Text="MONVISUAL  FPS: "..fps
+SLb.TextColor3=WHITE
+SLb.TextSize=12
+SLb.Font=Enum.Font.GothamBold
+SLb.TextXAlignment=Enum.TextXAlignment.Center
+SLb.TextTruncate=Enum.TextTruncate.AtEnd
+SLb.TextStrokeTransparency=1
+SLb.ZIndex=3
+local wRP=false
 RunService.RenderStepped:Connect(function(dt)
-    if radioIsPlaying and radioSound and radioSongs[radioCurrentIndex] then
-        SpeakerLabel.Text = "♪ " .. radioSongs[radioCurrentIndex].name
-        SpeakerLabel.TextSize = 14
-    else
-        SpeakerLabel.Text = "MONVISUAL  FPS: " .. fpsValue
-        SpeakerLabel.TextSize = 12
-    end
-
-    local nowPlaying = radioIsPlaying and radioSound ~= nil
-    if nowPlaying ~= wasRadioPlaying then
-        wasRadioPlaying = nowPlaying
-        local targetSize
-        if nowPlaying then
-            targetSize = UDim2.new(0, 165, 0, 30)
-        else
-            targetSize = UDim2.new(0, 200, 0, 30)
-        end
-        TweenService:Create(OpenBtn, TweenInfo.new(0.3, Enum.EasingStyle.Quad, Enum.EasingDirection.Out), {
-            Size = targetSize
-        }):Play()
-    end
-end)
-
-local speakerAnimating = false
-
-local function animateSpeaker(show)
-    if speakerAnimating then return end
-    speakerAnimating = true
-
-    local targetY
-    if show then
-        targetY = -0.08
-    else
-        targetY = -0.03
-    end
-
-    local tween = TweenService:Create(OpenBtn, TweenInfo.new(0.45, Enum.EasingStyle.Quint, Enum.EasingDirection.Out), {
-        Position = UDim2.new(0.5, 0, targetY, 0)
-    })
-    tween:Play()
-
-    tween.Completed:Connect(function()
-        speakerAnimating = false
-    end)
+if rPlay and rSnd and RS[rci] then
+SLb.Text="♪ "..RS[rci].name
+SLb.TextSize=14
+else
+SLb.Text="MONVISUAL  FPS: "..fps
+SLb.TextSize=12
 end
-
-_G.Monvisual_AnimateSpeaker = animateSpeaker
-
-OpenBtn.MouseButton1Click:Connect(function()
-    local show = not Main.Visible
-    toggleMenu(show)
-    animateSpeaker(show)
+local np=rPlay and rSnd~=nil
+if np~=wRP then
+wRP=np
+local ts
+if np then ts=UDim2.new(0,165,0,30) else ts=UDim2.new(0,200,0,30) end
+TweenService:Create(OBtn,TweenInfo.new(0.3,Enum.EasingStyle.Quad,Enum.EasingDirection.Out),{Size=ts}):Play()
+end
 end)
-
-UserInputService.InputBegan:Connect(function(input, processed)
-    if processed then return end
-    if input.KeyCode == Enum.KeyCode.RightShift then
-        local show = not Main.Visible
-        toggleMenu(show)
-        animateSpeaker(show)
-    end
+local sAn=false
+local function aSp(sh)
+if sAn then return end
+sAn=true
+local tY
+if sh then tY=-0.08 else tY=-0.03 end
+local tw=TweenService:Create(OBtn,TweenInfo.new(0.45,Enum.EasingStyle.Quint,Enum.EasingDirection.Out),{Position=UDim2.new(0.5,0,tY,0)})
+tw:Play()
+tw.Completed:Connect(function() sAn=false end)
+end
+_G.Monvisual_AnimateSpeaker=aSp
+OBtn.MouseButton1Click:Connect(function()
+local sh=not M.Visible
+tM(sh)
+aSp(sh)
 end)
-
-updateTheme()
-
-catButtons[1].MouseButton1Click:Fire()
-
-print("Monvisual Combat loaded! (v61)")
+UserInputService.InputBegan:Connect(function(inp,pr)
+if pr then return end
+if inp.KeyCode==Enum.KeyCode.RightShift then
+local sh=not M.Visible
+tM(sh)
+aSp(sh)
+end
+end)
+uT()
+cB[1].MouseButton1Click:Fire()
+print("Monvisual Combat loaded! (v59 compact)")
