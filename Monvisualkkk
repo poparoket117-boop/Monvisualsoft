@@ -1,4 +1,4 @@
--- Monvisual Combat (Standalone, Delta)
+-- Monvisual Combat (Standalone, Delta) — без анимаций
 if _G.MonCombat_Loaded then
     pcall(function() _G.MonCombat_ScreenGui:Destroy() end)
     _G.MonCombat_Loaded = false
@@ -11,7 +11,6 @@ local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local Lighting = game:GetService("Lighting")
 local HttpService = game:GetService("HttpService")
-local StarterPlayer = game:GetService("StarterPlayer")
 local Player = Players.LocalPlayer
 local Camera = workspace.CurrentCamera
 
@@ -36,7 +35,6 @@ local settings = {
     boxEspEnabled = false,
     skeletonEspEnabled = false,
     mm2ChamsEnabled = false,
-    animEnabled = false,
 }
 
 local CONFIG_FILE = "MonCombat_config.json"
@@ -50,21 +48,11 @@ local function _readfile(n)
     return nil
 end
 
-local Favorites = getgenv().AnimFavorites or {}
-getgenv().AnimFavorites = Favorites
-local CustomPacks = getgenv().AnimCustomPacks or {}
-getgenv().AnimCustomPacks = CustomPacks
-local Overrides = getgenv().AnimOverrides or {}
-getgenv().AnimOverrides = Overrides
-
 local function SaveConfig()
     local data = {}
     for k, v in pairs(settings) do data[k] = v end
     data.themeHue = themeHue
     data.themeIsClear = themeIsClear
-    data.favorites = Favorites
-    data.customPacks = CustomPacks
-    data.overrides = Overrides
     _writefile(CONFIG_FILE, HttpService:JSONEncode(data))
 end
 
@@ -78,193 +66,8 @@ local function LoadConfig()
     for k, v in pairs(parsed) do
         if settings[k] ~= nil then settings[k] = v end
     end
-    if parsed.favorites then for k, v in pairs(parsed.favorites) do Favorites[k] = v end end
-    if parsed.customPacks then
-        for k, v in pairs(parsed.customPacks) do
-            CustomPacks[k] = v
-        end
-    end
-    if parsed.overrides then for k, v in pairs(parsed.overrides) do Overrides[k] = v end end
 end
 LoadConfig()
-
--- ===================== ANIMATION CORE =====================
-local CurrentPack = nil
-local Tracks = {}
-local AnimConn = nil
-
-local function ClearTracks()
-    for _, t in pairs(Tracks) do
-        if t then pcall(function() t:Stop(0) t:Destroy() end) end
-    end
-    Tracks = {}
-end
-
-local function StopAllOther(hum)
-    if not hum then return end
-    for _, track in pairs(hum:GetPlayingAnimationTracks()) do
-        local isOurs = false
-        for _, our in pairs(Tracks) do
-            if our == track then isOurs = true break end
-        end
-        if not isOurs then pcall(function() track:Stop(0) end) end
-    end
-end
-
-local function LoadTracks(pack)
-    local char = Player.Character
-    if not char then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum then return end
-    ClearTracks()
-
-    local function make(id, prio)
-        if not id or id == "" then return nil end
-        local cleanId = tostring(id):gsub("%D", "")
-        if cleanId == "" then return nil end
-        local a = Instance.new("Animation")
-        a.AnimationId = "rbxassetid://" .. cleanId
-        local ok, track = pcall(function() return hum:LoadAnimation(a) end)
-        if ok and track then
-            track.Priority = prio
-            track.Looped = true
-            return track
-        end
-        return nil
-    end
-
-    Tracks.Idle     = make(pack.idle, Enum.AnimationPriority.Idle)
-    Tracks.Walk     = make(pack.walk, Enum.AnimationPriority.Movement)
-    Tracks.Run      = make(pack.run,  Enum.AnimationPriority.Movement)
-    Tracks.Jump     = make(pack.jump, Enum.AnimationPriority.Action)
-    Tracks.Fall     = make(pack.fall, Enum.AnimationPriority.Action)
-    Tracks.Climb    = make(pack.climb, Enum.AnimationPriority.Action)
-    Tracks.Swim     = make(pack.swim, Enum.AnimationPriority.Movement)
-    Tracks.SwimIdle = make(pack.swimidle or pack.idle, Enum.AnimationPriority.Idle)
-end
-
-local lastName, lastTime = nil, 0
-
-local function PlayAnim(name)
-    local track = Tracks[name]
-    if track and track.IsPlaying then
-        if track.TimePosition == lastTime and name == lastName then
-            pcall(function() track:Stop(0) track:Play(0.1) end)
-        end
-        lastTime = track.TimePosition
-        lastName = name
-        return
-    end
-    lastName, lastTime = name, 0
-    for n, t in pairs(Tracks) do
-        if t then
-            if n == name then
-                pcall(function() t:Play(0.15) t:AdjustSpeed(1) end)
-            elseif t.IsPlaying then
-                pcall(function() t:Stop(0.1) end)
-            end
-        end
-    end
-end
-
-local function UpdateAnim()
-    local char = Player.Character
-    if not char or not CurrentPack then return end
-    local hum = char:FindFirstChildOfClass("Humanoid")
-    if not hum or hum.Health <= 0 then return end
-
-    StopAllOther(hum)
-
-    local animate = char:FindFirstChild("Animate")
-    if animate then
-        pcall(function() animate.Disabled = true animate:Destroy() end)
-    end
-
-    local state = hum:GetState()
-    local speed = 0
-    if hum.RootPart then speed = hum.RootPart.AssemblyLinearVelocity.Magnitude end
-
-    if state == Enum.HumanoidStateType.Jumping then
-        PlayAnim("Jump")
-    elseif state == Enum.HumanoidStateType.Freefall then
-        PlayAnim("Fall")
-    elseif state == Enum.HumanoidStateType.Climbing then
-        PlayAnim("Climb")
-    elseif state == Enum.HumanoidStateType.Swimming then
-        PlayAnim(speed > 1 and "Swim" or "SwimIdle")
-    else
-        if speed > 1.5 then
-            PlayAnim(speed > 14 and "Run" or "Walk")
-        else
-            PlayAnim("Idle")
-        end
-    end
-end
-
-local function ApplyPack(pack)
-    if not pack then return end
-    CurrentPack = pack
-    lastName = nil
-
-    local char = Player.Character
-    if not char then return end
-    local hum = char:WaitForChild("Humanoid", 5)
-    if not hum then return end
-
-    local animate = char:FindFirstChild("Animate")
-    if animate then
-        pcall(function() animate.Disabled = true animate:Destroy() end)
-    end
-
-    for _, t in pairs(hum:GetPlayingAnimationTracks()) do
-        pcall(function() t:Stop(0) end)
-    end
-
-    task.wait(0.2)
-    LoadTracks(pack)
-
-    if AnimConn then AnimConn:Disconnect() AnimConn = nil end
-    AnimConn = RunService.RenderStepped:Connect(UpdateAnim)
-end
-
-local function ResetAnimations()
-    if AnimConn then AnimConn:Disconnect() AnimConn = nil end
-    ClearTracks()
-    CurrentPack = nil
-    lastName = nil
-
-    local char = Player.Character
-    if char then
-        local hum = char:FindFirstChildOfClass("Humanoid")
-        if hum then
-            for _, t in pairs(hum:GetPlayingAnimationTracks()) do
-                pcall(function() t:Stop(0) end)
-            end
-        end
-        if not char:FindFirstChild("Animate") then
-            local animate = StarterPlayer.StarterCharacterScripts:FindFirstChild("Animate")
-            if animate then animate:Clone().Parent = char end
-        else
-            char:FindFirstChild("Animate").Disabled = false
-        end
-    end
-end
-
-local Packs = {
-    ["Default"]   = {idle="507766388", walk="507777826", run="507767714", jump="507765000", climb="507765644", fall="507767968", swim="507785072", swimidle="507784897"},
-    ["Rthro"]     = {idle="2510196951", walk="2510202577", run="2510198475", jump="2510197830", climb="2510192778", fall="2510195892", swim="2510199791", swimidle="2510201162"},
-    ["Ninja"]     = {idle="656117400", walk="656121766", run="656118852", jump="656117878", climb="656114359", fall="656115606", swim="656119721", swimidle="656121397"},
-    ["Robot"]     = {idle="616088211", walk="616095330", run="616091570", jump="616090535", climb="616086039", fall="616087089", swim="616092998", swimidle="616094091"},
-    ["Stylish"]   = {idle="616136790", walk="616146177", run="616140816", jump="616139451", climb="616133594", fall="616134815", swim="616143378", swimidle="616144772"},
-    ["Cartoony"]  = {idle="742637544", walk="742640026", run="742638842", jump="742637942", climb="742636889", fall="742637151", swim="742639220", swimidle="742639812"},
-    ["Toy"]       = {idle="782841498", walk="782843345", run="782842708", jump="782847020", climb="782843869", fall="782846423", swim="782844582", swimidle="782845186"},
-    ["Oldschool"] = {idle="5319828216", walk="5319847204", run="5319844329", jump="5319841935", climb="5319816685", fall="5319839762", swim="5319850266", swimidle="5319852613"},
-    ["Zombie"]    = {idle="616158929", walk="616168032", run="616163682", jump="616161997", climb="616156119", fall="616157476", swim="616165109", swimidle="616166655"},
-    ["Superhero"] = {idle="616111295", walk="616122287", run="616117076", jump="616115533", climb="616104706", fall="616108001", swim="616119360", swimidle="616120861"},
-    ["Werewolf"]  = {idle="1083195517", walk="1083178339", run="1083216690", jump="1083218792", climb="1083182000", fall="1083189019", swim="1083222527", swimidle="1083225406"},
-    ["Vampire"]   = {idle="1083445855", walk="1083473930", run="1083462077", jump="1083455352", climb="1083439238", fall="1083443587", swim="1083464683", swimidle="1083467779"},
-}
-for name, pack in pairs(CustomPacks) do Packs[name] = pack end
 
 -- ===================== CHAMS =====================
 local chamsHighlights = {}
@@ -533,7 +336,6 @@ end)
 
 -- ===================== LOOPS =====================
 RunService.RenderStepped:Connect(function()
-    -- Box ESP
     if settings.boxEspEnabled then
         for player, data in pairs(Boxes) do
             local character = player.Character
@@ -574,7 +376,6 @@ RunService.RenderStepped:Connect(function()
         for _, data in pairs(Boxes) do data.Box.Visible = false end
     end
 
-    -- Skeleton ESP
     if settings.skeletonEspEnabled then
         for _, p in ipairs(Players:GetPlayers()) do
             if p ~= Player and p.Character and p.Character.Parent then
@@ -732,12 +533,12 @@ local Tabs, Frames = {}, {}
 
 local function CreateTab(name)
     local btn = Instance.new("TextButton", TabBar)
-    btn.Size = UDim2.new(0, 68, 1, 0)
+    btn.Size = UDim2.new(0, 90, 1, 0)
     btn.BackgroundColor3 = Color3.fromRGB(40, 40, 52)
     btn.Text = name
     btn.TextColor3 = Color3.fromRGB(200, 200, 210)
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 10
+    btn.TextSize = 11
     btn.AutoButtonColor = false
     btn.BorderSizePixel = 0
     Instance.new("UICorner", btn).CornerRadius = UDim.new(0, 7)
@@ -777,10 +578,6 @@ end
 
 CreateTab("ESP")
 CreateTab("MM2")
-CreateTab("Packs")
-CreateTab("Fav")
-CreateTab("Custom")
-CreateTab("Anim")
 CreateTab("Themes")
 Tabs["ESP"].BackgroundColor3 = getAccentColor()
 Frames["ESP"].Visible = true
@@ -850,85 +647,6 @@ local function createToggleCard(parent, f)
         end
         SaveConfig()
     end)
-
-    return card
-end
-
--- ===== КАРТОЧКА ПАКА =====
-local function makePackCard(parent, name, pack, isCustom)
-    local card = Instance.new("Frame", parent)
-    card.Size = UDim2.new(1, 0, 0, 55)
-    card.BackgroundColor3 = getThemeColor()
-    card.BackgroundTransparency = getTransparency()
-    card.BorderSizePixel = 0
-    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 10)
-    local st = Instance.new("UIStroke", card)
-    st.Color = getAccentColor()
-    st.Thickness = 1
-
-    local title = Instance.new("TextLabel", card)
-    title.Size = UDim2.new(1, -100, 0, 20)
-    title.Position = UDim2.new(0, 10, 0, 6)
-    title.BackgroundTransparency = 1
-    title.Text = name
-    title.TextColor3 = WHITE
-    title.TextSize = 13
-    title.Font = Enum.Font.GothamBold
-    title.TextXAlignment = Enum.TextXAlignment.Left
-
-    local desc = Instance.new("TextLabel", card)
-    desc.Size = UDim2.new(1, -100, 0, 16)
-    desc.Position = UDim2.new(0, 10, 0, 28)
-    desc.BackgroundTransparency = 1
-    desc.Text = isCustom and "пользовательский" or "нажми чтобы надеть"
-    desc.TextColor3 = Color3.fromRGB(160, 160, 170)
-    desc.TextSize = 10
-    desc.Font = Enum.Font.Gotham
-    desc.TextXAlignment = Enum.TextXAlignment.Left
-
-    local star = Instance.new("TextButton", card)
-    star.Size = UDim2.new(0, 26, 0, 26)
-    star.Position = UDim2.new(1, -60, 0.5, -13)
-    star.BackgroundTransparency = 1
-    star.Text = Favorites[name] and "★" or "☆"
-    star.TextColor3 = Favorites[name] and Color3.fromRGB(255, 200, 50) or Color3.fromRGB(140, 140, 150)
-    star.Font = Enum.Font.GothamBold
-    star.TextSize = 18
-    star.BorderSizePixel = 0
-
-    star.MouseButton1Click:Connect(function()
-        if Favorites[name] then
-            Favorites[name] = nil
-            star.Text = "☆"
-            star.TextColor3 = Color3.fromRGB(140, 140, 150)
-        else
-            Favorites[name] = pack
-            star.Text = "★"
-            star.TextColor3 = Color3.fromRGB(255, 200, 50)
-        end
-        RefreshFavorites()
-        SaveConfig()
-    end)
-
-    local apply = Instance.new("TextButton", card)
-    apply.Size = UDim2.new(0, 22, 0, 22)
-    apply.Position = UDim2.new(1, -30, 0.5, -11)
-    apply.BackgroundColor3 = BLACK
-    apply.Text = "▶"
-    apply.TextColor3 = WHITE
-    apply.TextSize = 12
-    apply.Font = Enum.Font.GothamBold
-    apply.BorderSizePixel = 0
-    apply.AutoButtonColor = false
-    Instance.new("UICorner", apply).CornerRadius = UDim.new(1, 0)
-
-    apply.MouseButton1Click:Connect(function()
-        ApplyPack(pack)
-        settings.animEnabled = true
-        apply.BackgroundColor3 = getAccentColor()
-        task.wait(0.25)
-        apply.BackgroundColor3 = BLACK
-    end)
 end
 
 -- ===== ESP вкладка =====
@@ -954,197 +672,29 @@ local mm2ChamsFunc = {name="MM2 Chams", desc="Роли: убийца/шериф/
     callback=function(on) settings.mm2ChamsEnabled = on end}
 createToggleCard(Frames["MM2"], mm2ChamsFunc)
 
--- ===== Packs вкладка =====
-for name, pack in pairs(Packs) do
-    makePackCard(Frames["Packs"], name, pack, false)
-end
-
--- ===== Fav вкладка =====
-function RefreshFavorites()
-    for _, c in ipairs(Frames["Fav"]:GetChildren()) do
-        if c:IsA("Frame") then c:Destroy() end
-    end
-    for name, pack in pairs(Favorites) do
-        makePackCard(Frames["Fav"], name, pack, false)
-    end
-end
-RefreshFavorites()
-
--- ===== Custom вкладка =====
-local customFrame = Frames["Custom"]
-
-local function addLabel(parent, text)
-    local l = Instance.new("TextLabel", parent)
-    l.Size = UDim2.new(1, 0, 0, 16)
-    l.BackgroundTransparency = 1
-    l.Text = text
-    l.TextColor3 = Color3.fromRGB(180, 180, 190)
-    l.Font = Enum.Font.Gotham
-    l.TextSize = 11
-    l.TextXAlignment = Enum.TextXAlignment.Left
-    return l
-end
-
-local function addBox(parent, placeholder)
-    local b = Instance.new("TextBox", parent)
-    b.Size = UDim2.new(1, 0, 0, 28)
-    b.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-    b.Text = ""
-    b.PlaceholderText = placeholder
-    b.TextColor3 = WHITE
-    b.PlaceholderColor3 = Color3.fromRGB(100, 100, 110)
-    b.Font = Enum.Font.Gotham
-    b.TextSize = 12
-    b.ClearTextOnFocus = false
-    b.BorderSizePixel = 0
-    Instance.new("UICorner", b).CornerRadius = UDim.new(0, 6)
-    return b
-end
-
-addLabel(customFrame, "Название пака")
-local NameBox = addBox(customFrame, "Мой пак")
-addLabel(customFrame, "Idle ID")
-local IdleBox = addBox(customFrame, "Idle ID")
-addLabel(customFrame, "Walk ID")
-local WalkBox = addBox(customFrame, "Walk ID")
-addLabel(customFrame, "Run ID")
-local RunBox = addBox(customFrame, "Run ID")
-addLabel(customFrame, "Jump ID")
-local JumpBox = addBox(customFrame, "Jump ID")
-addLabel(customFrame, "Fall ID")
-local FallBox = addBox(customFrame, "Fall ID")
-addLabel(customFrame, "Climb ID")
-local ClimbBox = addBox(customFrame, "Climb ID")
-addLabel(customFrame, "Swim ID")
-local SwimBox = addBox(customFrame, "Swim ID")
-
-local SaveBtn = Instance.new("TextButton", customFrame)
-SaveBtn.Size = UDim2.new(1, 0, 0, 34)
-SaveBtn.BackgroundColor3 = getAccentColor()
-SaveBtn.Text = "Сохранить пак"
-SaveBtn.TextColor3 = BLACK
-SaveBtn.Font = Enum.Font.GothamBold
-SaveBtn.TextSize = 13
-SaveBtn.BorderSizePixel = 0
-Instance.new("UICorner", SaveBtn).CornerRadius = UDim.new(0, 8)
-
-SaveBtn.MouseButton1Click:Connect(function()
-    local name = NameBox.Text
-    if name == "" then name = "Custom " .. tostring(os.time()) end
-    local pack = {
-        idle = IdleBox.Text, walk = WalkBox.Text, run = RunBox.Text,
-        jump = JumpBox.Text, fall = FallBox.Text,
-        climb = ClimbBox.Text ~= "" and ClimbBox.Text or JumpBox.Text,
-        swim = SwimBox.Text ~= "" and SwimBox.Text or WalkBox.Text,
-        swimidle = IdleBox.Text
-    }
-    CustomPacks[name] = pack
-    Packs[name] = pack
-    makePackCard(Frames["Packs"], name, pack, true)
-    ApplyPack(pack)
-    settings.animEnabled = true
-    SaveConfig()
-    SaveBtn.Text = "Сохранено!"
-    task.wait(1.2)
-    SaveBtn.Text = "Сохранить пак"
-end)
-
--- ===== Anim вкладка =====
-local animFrame = Frames["Anim"]
-
-local function rebuildWithOverrides()
-    if not CurrentPack then return end
-    local merged = {}
-    for k, v in pairs(CurrentPack) do merged[k] = v end
-    for k, v in pairs(Overrides) do merged[k] = v end
-    LoadTracks(merged)
-end
-
-local slots = {
-    {"Idle", "idle"}, {"Walk", "walk"}, {"Run", "run"}, {"Jump", "jump"},
-    {"Fall", "fall"}, {"Climb", "climb"}, {"Swim", "swim"}, {"SwimIdle", "swimidle"},
-}
-
-for _, slot in ipairs(slots) do
-    local label, key = slot[1], slot[2]
-
-    local card = Instance.new("Frame", animFrame)
-    card.Size = UDim2.new(1, 0, 0, 80)
-    card.BackgroundColor3 = getThemeColor()
-    card.BackgroundTransparency = getTransparency()
-    card.BorderSizePixel = 0
-    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 10)
-    local st = Instance.new("UIStroke", card)
-    st.Color = getAccentColor()
-    st.Thickness = 1
-
-    local lbl = Instance.new("TextLabel", card)
-    lbl.Size = UDim2.new(1, -70, 0, 18)
-    lbl.Position = UDim2.new(0, 10, 0, 5)
-    lbl.BackgroundTransparency = 1
-    lbl.Text = label
-    lbl.TextColor3 = WHITE
-    lbl.TextSize = 13
-    lbl.Font = Enum.Font.GothamBold
-    lbl.TextXAlignment = Enum.TextXAlignment.Left
-
-    local clearBtn = Instance.new("TextButton", card)
-    clearBtn.Size = UDim2.new(0, 60, 0, 18)
-    clearBtn.Position = UDim2.new(1, -70, 0, 5)
-    clearBtn.BackgroundColor3 = Color3.fromRGB(60, 60, 80)
-    clearBtn.Text = "Clear"
-    clearBtn.TextColor3 = Color3.fromRGB(220, 220, 230)
-    clearBtn.Font = Enum.Font.Gotham
-    clearBtn.TextSize = 10
-    clearBtn.BorderSizePixel = 0
-    Instance.new("UICorner", clearBtn).CornerRadius = UDim.new(0, 5)
-
-    local box = Instance.new("TextBox", card)
-    box.Size = UDim2.new(1, -90, 0, 30)
-    box.Position = UDim2.new(0, 10, 0, 28)
-    box.BackgroundColor3 = Color3.fromRGB(35, 35, 45)
-    box.Text = Overrides[key] and tostring(Overrides[key]) or ""
-    box.PlaceholderText = "Animation ID"
-    box.TextColor3 = WHITE
-    box.PlaceholderColor3 = Color3.fromRGB(100, 100, 110)
-    box.Font = Enum.Font.Gotham
-    box.TextSize = 12
-    box.ClearTextOnFocus = false
-    box.BorderSizePixel = 0
-    Instance.new("UICorner", box).CornerRadius = UDim.new(0, 6)
-
-    local applyBtn = Instance.new("TextButton", card)
-    applyBtn.Size = UDim2.new(0, 70, 0, 30)
-    applyBtn.Position = UDim2.new(1, -80, 0, 28)
-    applyBtn.BackgroundColor3 = getAccentColor()
-    applyBtn.Text = "Apply"
-    applyBtn.TextColor3 = BLACK
-    applyBtn.Font = Enum.Font.GothamBold
-    applyBtn.TextSize = 12
-    applyBtn.BorderSizePixel = 0
-    Instance.new("UICorner", applyBtn).CornerRadius = UDim.new(0, 6)
-
-    applyBtn.MouseButton1Click:Connect(function()
-        local id = box.Text
-        if id == "" then return end
-        Overrides[key] = id
-        rebuildWithOverrides()
-        applyBtn.BackgroundColor3 = Color3.fromRGB(0, 200, 120)
-        task.wait(0.25)
-        applyBtn.BackgroundColor3 = getAccentColor()
-        SaveConfig()
-    end)
-
-    clearBtn.MouseButton1Click:Connect(function()
-        Overrides[key] = nil
-        box.Text = ""
-        rebuildWithOverrides()
-        SaveConfig()
-    end)
-end
-
 -- ===== Themes вкладка =====
 local themesFrame = Frames["Themes"]
+
+local function refreshTheme()
+    Stroke.Color = getAccentColor()
+    for _, f in pairs(Frames) do
+        f.ScrollBarImageColor3 = getAccentColor()
+    end
+    for _, f in pairs(Frames) do
+        for _, card in ipairs(f:GetChildren()) do
+            if card:IsA("Frame") then
+                for _, c in ipairs(card:GetChildren()) do
+                    if c:IsA("UIStroke") then c.Color = getAccentColor() end
+                end
+            end
+        end
+    end
+    for n, b in pairs(Tabs) do
+        if b.BackgroundColor3 ~= Color3.fromRGB(40, 40, 52) then
+            b.BackgroundColor3 = getAccentColor()
+        end
+    end
+end
 
 local function makeThemeButton(parent, name, hue, isClear)
     local card = Instance.new("Frame", parent)
@@ -1206,7 +756,6 @@ local function makeThemeButton(parent, name, hue, isClear)
     end)
 end
 
--- тема-карточки
 local themeList = {
     {"Фиолетовая", 270},
     {"Синяя", 220},
@@ -1221,27 +770,6 @@ for _, t in ipairs(themeList) do
     makeThemeButton(themesFrame, t[1], t[2], false)
 end
 makeThemeButton(themesFrame, "Белая", 0, true)
-
-local function refreshTheme()
-    Stroke.Color = getAccentColor()
-    for _, f in pairs(Frames) do
-        f.ScrollBarImageColor3 = getAccentColor()
-    end
-    for _, f in pairs(Frames) do
-        for _, card in ipairs(f:GetChildren()) do
-            if card:IsA("Frame") then
-                for _, c in ipairs(card:GetChildren()) do
-                    if c:IsA("UIStroke") then c.Color = getAccentColor() end
-                end
-            end
-        end
-    end
-    for n, b in pairs(Tabs) do
-        if b.BackgroundColor3 ~= Color3.fromRGB(40, 40, 52) then
-            b.BackgroundColor3 = getAccentColor()
-        end
-    end
-end
 
 -- ===== ДИНАМИК =====
 local OpenBtn = Instance.new("TextButton", ScreenGui)
@@ -1286,17 +814,9 @@ UserInputService.InputBegan:Connect(function(input, processed)
     end
 end)
 
--- ===== RESPAWN =====
-Player.CharacterAdded:Connect(function(char)
-    if settings.animEnabled and CurrentPack then
-        task.wait(1)
-        ApplyPack(CurrentPack)
-    end
-end)
-
 -- ===== ПРИМЕНИТЬ СОХРАНЁННЫЕ =====
 if settings.chamsEnabled then ApplyChams() end
 if settings.boxEspEnabled then ApplyBoxEsp() end
 if settings.skeletonEspEnabled then ApplySkeletonEsp() end
 
-print("Monvisual Combat loaded (full)")
+print("Monvisual Combat loaded (ESP only)")
